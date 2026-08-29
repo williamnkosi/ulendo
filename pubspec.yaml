@@ -11,4 +11,13 @@ workspace:
   - packages/ulendo_models
 
 dev_dependencies:
-  melos: ^6.0.0
+  melos: ^7.3.0
+
+melos:
+  scripts:
+    run:rider:
+      run: cd apps/rider_app && flutter run
+      description: Run the Rider App locally.
+    run:driver:
+      run: cd apps/driver_app && flutter run
+      description: Run the Driver App locally.

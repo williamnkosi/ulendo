@@ -32,7 +32,11 @@ dependencies:
   flutter:
     sdk: flutter
   ulendo_core:
-    path: "../../packages/ulendo_core"
+    path: ../../packages/ulendo_core
+  ulendo_models:
+    path: ../../packages/ulendo_models
+  ulendo_ui:
+    path: ../../packages/ulendo_ui
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
