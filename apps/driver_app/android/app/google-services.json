@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "110852320623",
+    "firebase_url": "https://ulendo-dev-default-rtdb.firebaseio.com",
+    "project_id": "ulendo-dev",
+    "storage_bucket": "ulendo-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110852320623:android:d1d425b01893b2489f8c9a",
+        "android_client_info": {
+          "package_name": "mw.ulendo.driver_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEib4eB_DZ_ij0ih2B7PzHcFFoVpN7J-4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110852320623:android:89a8a8c9277c124e9f8c9a",
+        "android_client_info": {
+          "package_name": "mw.ulendo.rider_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEib4eB_DZ_ij0ih2B7PzHcFFoVpN7J-4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
