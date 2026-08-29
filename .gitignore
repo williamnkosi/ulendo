@@ -1,0 +1,100 @@
+# ==========================================
+# Flutter & Dart Workspace (Melos / Pub)
+# ==========================================
+# Xcode & Flutter build output
+**/build/
+**/.dart_tool/
+**/.pub-cache/
+**/.pub/
+**/pubspec.lock
+**/pubspec_overrides.yaml
+
+# Symbolic links created by Melos / Pub Workspaces
+**/.packages
+
+# Coverage output
+**/coverage/
+
+# Generated code caches (JsonSerializable, Freezed, etc.)
+*.g.dart
+*.freezed.dart
+
+# ==========================================
+# Firebase & Cloud Functions Backend
+# ==========================================
+# Firebase CLI logs & runtime state
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+
+# Cloud Functions build output & node modules
+functions/lib/
+functions/node_modules/
+**/node_modules/
+
+# Firebase local runtime config & service account keys
+functions/.runtimeconfig.json
+*.secret.json
+service-account*.json
+
+# Optional: Un-comment if you generate Firebase credentials dynamically in CI/CD
+# **/google-services.json
+# **/GoogleService-Info.plist
+# **/firebase_options.dart
+
+# ==========================================
+# Android Native (apps/rider_app & apps/driver_app)
+# ==========================================
+**/android/.gradle/
+**/android/app/build/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/key.jks
+**/android/*.keystore
+
+# ==========================================
+# iOS Native (apps/rider_app & apps/driver_app)
+# ==========================================
+**/ios/Pods/
+**/ios/Podfile.lock
+**/ios/.symlinks/
+**/ios/profile
+**/ios/DerivedData/
+**/ios/Runner.xcworkspace
+**/ios/Runner.xcodeproj/project.xcworkspace
+**/ios/Runner.xcodeproj/xcuserdata/
+
+# Swift Package Manager build output
+**/ios/.build/
+
+# ==========================================
+# IDEs, Editors & OS Files
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+**/Thumbs.db
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Miscellaneous
+*.log
+*.tmp
+*.bak
