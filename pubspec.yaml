@@ -1,0 +1,14 @@
+name: ulendo_workspace
+publish_to: none
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+workspace:
+  - apps/rider_app
+  - apps/driver_app
+  - packages/ulendo_core
+  - packages/ulendo_ui
+  - packages/ulendo_models
+
+dev_dependencies:
+  melos: ^6.0.0
