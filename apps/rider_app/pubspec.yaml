@@ -31,6 +31,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  firebase_core: ^4.1.1
   ulendo_core:
     path: "../../packages/ulendo_core"
 
