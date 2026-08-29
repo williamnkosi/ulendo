@@ -98,3 +98,5 @@ service-account*.json
 *.log
 *.tmp
 *.bak
+# Widget Preview related
+.widget_preview/
