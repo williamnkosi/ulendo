@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:ulendo_core/ulendo_core.dart';
 
 class RiderLoginPage extends StatefulWidget {
@@ -13,6 +14,14 @@ class _RiderLoginPageState extends State<RiderLoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _emailValidator = ValidationBuilder()
+      .required('Email is required')
+      .email('Enter a valid email')
+      .build();
+  final _passwordValidator = ValidationBuilder()
+      .required('Password is required')
+      .minLength(6, 'Minimum 6 characters')
+      .build();
 
   @override
   void dispose() {
@@ -110,16 +119,7 @@ class _RiderLoginPageState extends State<RiderLoginPage> {
                                     labelText: 'Email',
                                     hintText: 'you@example.com',
                                   ),
-                                  validator: (value) {
-                                    final email = value?.trim() ?? '';
-                                    if (email.isEmpty) {
-                                      return 'Email is required';
-                                    }
-                                    if (!email.contains('@')) {
-                                      return 'Enter a valid email';
-                                    }
-                                    return null;
-                                  },
+                                  validator: _emailValidator,
                                 ),
                                 const SizedBox(height: 16),
                                 TextFormField(
@@ -132,16 +132,7 @@ class _RiderLoginPageState extends State<RiderLoginPage> {
                                     labelText: 'Password',
                                     hintText: 'Enter your password',
                                   ),
-                                  validator: (value) {
-                                    final password = value ?? '';
-                                    if (password.isEmpty) {
-                                      return 'Password is required';
-                                    }
-                                    if (password.length < 6) {
-                                      return 'Minimum 6 characters';
-                                    }
-                                    return null;
-                                  },
+                                  validator: _passwordValidator,
                                 ),
                                 const SizedBox(height: 24),
                                 ElevatedButton(
