@@ -28,8 +28,8 @@ export const onUserCreatedFunction = functions.auth
       firstName: "",
       lastName: "",
       phoneNumber: "",
-      role: "rider",
-      profileImageUrl: null,
+      role: [],
+      profileImageUrl: "https://placehold.net/600x600.png",
       createdAt: now,
       updatedAt: now,
     });
