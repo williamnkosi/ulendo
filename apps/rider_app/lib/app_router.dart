@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'login_page.dart';
+
 class RiderAppRouter {
   RiderAppRouter() {
     _refreshListenable = _StreamRefreshListenable(
@@ -33,7 +35,7 @@ class RiderAppRouter {
     routes: [
       GoRoute(
         path: '/sign-in',
-        builder: (_, __) => const _PlaceholderPage(title: 'Rider Sign In'),
+        builder: (_, __) => const RiderLoginPage(),
       ),
       GoRoute(
         path: '/home',

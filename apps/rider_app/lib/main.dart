@@ -47,7 +47,6 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MaterialApp.router(
-        title: 'Ulendo Rider',
         theme: buildAppTheme(),
         routerConfig: _appRouter.router,
       ),
