@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ulendo_core/ulendo_core.dart';
 import 'package:ulendo_ui/ulendo_ui.dart';
 
+import 'app_router.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -13,8 +14,27 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final RiderAppRouter _appRouter;
+
+  @override
+  void initState() {
+    super.initState();
+    _appRouter = RiderAppRouter();
+  }
+
+  @override
+  void dispose() {
+    _appRouter.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,29 +46,10 @@ class MyApp extends StatelessWidget {
                 ..add(const AuthStarted()),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Ulendo Rider',
         theme: buildAppTheme(),
-        home: const _PlaceholderScreen(appName: 'Rider App'),
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.appName});
-
-  final String appName;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(appName)),
-      body: Center(
-        child: Text(
-          '$appName placeholder',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        routerConfig: _appRouter.router,
       ),
     );
   }
