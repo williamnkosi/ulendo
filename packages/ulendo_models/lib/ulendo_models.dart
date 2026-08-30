@@ -3,6 +3,4 @@
 /// More dartdocs go here.
 library;
 
-export 'src/ulendo_models_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/user/user_model.dart';
