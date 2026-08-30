@@ -51,10 +51,4 @@ class AppSpacing extends ThemeExtension<AppSpacing> {
   }
 }
 
-const defaultAppSpacing = AppSpacing(
-  xs: 4,
-  s: 8,
-  m: 16,
-  l: 24,
-  xl: 32,
-);
+const defaultAppSpacing = AppSpacing(xs: 4, s: 8, m: 16, l: 24, xl: 32);
