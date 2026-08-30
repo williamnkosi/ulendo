@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'home_page.dart';
 import 'login_page.dart';
+import 'navigation/app_bottom_navigation_bar.dart';
 
 class RiderAppRouter {
   RiderAppRouter() {
@@ -35,7 +35,7 @@ class RiderAppRouter {
     },
     routes: [
       GoRoute(path: '/sign-in', builder: (_, __) => const RiderLoginPage()),
-      GoRoute(path: '/home', builder: (_, __) => const RiderHomePage()),
+      GoRoute(path: '/home', builder: (_, __) => const AppBottomNavigationBar()),
     ],
   );
 
