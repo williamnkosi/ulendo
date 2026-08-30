@@ -1,5 +1,3 @@
-library ulendo_core;
-
 export 'auth/auth_repository.dart';
 export 'auth/auth_event.dart';
 export 'auth/auth_state.dart';
