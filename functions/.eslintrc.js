@@ -14,6 +14,7 @@ module.exports = {
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
+    tsconfigRootDir: __dirname,
     project: ["tsconfig.json", "tsconfig.dev.json"],
     sourceType: "module",
   },
@@ -21,13 +22,11 @@ module.exports = {
     "/lib/**/*", // Ignore built files.
     "/generated/**/*", // Ignore generated files.
   ],
-  plugins: [
-    "@typescript-eslint",
-    "import",
-  ],
+  plugins: ["@typescript-eslint", "import"],
   rules: {
-    "quotes": ["error", "double"],
+    quotes: ["error", "double"],
     "import/no-unresolved": 0,
-    "indent": ["error", 2],
+    indent: ["error", 2],
+    "object-curly-spacing": ["error", "always"],
   },
 };
