@@ -43,6 +43,19 @@ class _RiderLoginPageState extends State<RiderLoginPage> {
     );
   }
 
+  void _requestSignUp() {
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    context.read<AuthBloc>().add(
+      SignUpRequested(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
@@ -143,7 +156,7 @@ class _RiderLoginPageState extends State<RiderLoginPage> {
                                 ),
                                 const SizedBox(height: 12),
                                 OutlinedButton(
-                                  onPressed: isLoading ? null : () {},
+                                  onPressed: isLoading ? null : _requestSignUp,
                                   child: const Text('Sign Up'),
                                 ),
                               ],
