@@ -11,8 +11,8 @@ abstract class UserModel with _$UserModel {
     required String firstName,
     required String lastName,
     required String phoneNumber,
-    required String role,
-    String? profileImageUrl,
+    required List<String> role,
+    required String profileImageUrl,
     @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
     required DateTime createdAt,
     @JsonKey(fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)
