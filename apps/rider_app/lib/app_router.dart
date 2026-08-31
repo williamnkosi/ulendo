@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'login_page.dart';
-import 'navigation/app_bottom_navigation_bar.dart';
+import 'navigation/rider_shell.dart';
 
 class RiderAppRouter {
   RiderAppRouter() {
@@ -35,7 +35,7 @@ class RiderAppRouter {
     },
     routes: [
       GoRoute(path: '/sign-in', builder: (_, __) => const RiderLoginPage()),
-      GoRoute(path: '/home', builder: (_, __) => const AppBottomNavigationBar()),
+      GoRoute(path: '/home', builder: (_, __) => const RiderShell()),
     ],
   );
 

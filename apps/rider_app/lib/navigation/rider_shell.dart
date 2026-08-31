@@ -4,14 +4,14 @@ import 'package:rider_app/activity/activity_page.dart';
 import 'package:rider_app/home/home_page.dart';
 
 /// The root navigation shell that provides bottom tab navigation.
-class AppBottomNavigationBar extends StatefulWidget {
-  const AppBottomNavigationBar({super.key});
+class RiderShell extends StatefulWidget {
+  const RiderShell({super.key});
 
   @override
-  State<AppBottomNavigationBar> createState() => _AppBottomNavigationBarState();
+  State<RiderShell> createState() => _RiderShellState();
 }
 
-class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
+class _RiderShellState extends State<RiderShell> {
   int _selectedIndex = 0;
 
   Widget _generatePage() {
