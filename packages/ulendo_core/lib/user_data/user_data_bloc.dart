@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'user_data_repository.dart';
 import 'user_data_event.dart';
 import 'user_data_state.dart';
@@ -11,37 +13,26 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
 
   /// Creates an instance of [UserDataBloc] with the required [UserDataRepository].
   UserDataBloc({required UserDataRepository userDataRepository})
-      : _userDataRepository = userDataRepository,
-        super(const UserDataInitial()) {
+    : _userDataRepository = userDataRepository,
+      super(const UserDataState()) {
     on<UserDataLoaded>(_onUserDataLoaded);
     on<UserDataChanged>(_onUserDataChanged);
     on<UserDataUpdated>(_onUserDataUpdated);
     on<UserDataCleared>(_onUserDataCleared);
   }
 
-  void _onUserDataLoaded(
-    UserDataLoaded event,
-    Emitter<UserDataState> emit,
-  ) {
-    emit(const UserDataLoading());
+  void _onUserDataLoaded(UserDataLoaded event, Emitter<UserDataState> emit) {
     _userSubscription?.cancel();
-    _userSubscription = _userDataRepository.watchUser(event.uid).listen(
-      (user) => add(UserDataChanged(user)),
-      onError: (Object error) =>
-          add(UserDataChanged(null)),
-    );
+    _userSubscription = _userDataRepository
+        .watchUser(event.uid)
+        .listen(
+          (user) => add(UserDataChanged(user)),
+          onError: (Object error) => add(UserDataChanged(null)),
+        );
   }
 
-  void _onUserDataChanged(
-    UserDataChanged event,
-    Emitter<UserDataState> emit,
-  ) {
-    final user = event.user;
-    if (user != null) {
-      emit(UserDataSuccess(user));
-    } else {
-      emit(const UserDataEmpty());
-    }
+  void _onUserDataChanged(UserDataChanged event, Emitter<UserDataState> emit) {
+    emit(UserDataState(userProfile: event.user));
   }
 
   Future<void> _onUserDataUpdated(
@@ -58,17 +49,14 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
       );
       // The real-time listener from watchUser will emit the new state automatically.
     } catch (e) {
-      emit(UserDataFailure(e.toString()));
+      emit(const UserDataState());
     }
   }
 
-  void _onUserDataCleared(
-    UserDataCleared event,
-    Emitter<UserDataState> emit,
-  ) {
+  void _onUserDataCleared(UserDataCleared event, Emitter<UserDataState> emit) {
     _userSubscription?.cancel();
     _userSubscription = null;
-    emit(const UserDataInitial());
+    emit(const UserDataState());
   }
 
   @override
