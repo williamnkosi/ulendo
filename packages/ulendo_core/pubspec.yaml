@@ -14,8 +14,11 @@ dependencies:
     sdk: flutter
   firebase_core: ^4.14.0
   firebase_auth: ^6.6.1
+  cloud_firestore: ^6.9.0
   flutter_bloc: ^9.1.1
   bloc: ^9.2.1
+  ulendo_models:
+    path: ../ulendo_models
 
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
