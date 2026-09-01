@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rider_app/account/account_page.dart';
 import 'package:rider_app/activity/activity_page.dart';
 import 'package:rider_app/home/home_page.dart';
+import 'package:rider_app/user_data_form/user_data_form.dart';
 import 'package:ulendo_core/user_data/user_data_bloc.dart';
+import 'package:ulendo_core/user_data/user_data_event.dart';
 import 'package:ulendo_core/user_data/user_data_repository.dart';
 import 'package:ulendo_core/user_data/user_data_state.dart';
 
@@ -32,33 +35,47 @@ class _RiderShellState extends State<RiderShell> {
 
   @override
   Widget build(BuildContext context) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
     return BlocProvider(
-      create: (context) =>
-          UserDataBloc(userDataRepository: UserDataRepository()),
-      child: Scaffold(
-        body: BlocBuilder<UserDataBloc, UserDataState>(
-          builder: (context, state) {
-            if (state.status == UserDataStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return _generatePage();
-          },
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (value) => setState(() => _selectedIndex = value),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.local_activity_rounded),
-              label: 'Activity',
+      create: (context) {
+        final bloc = UserDataBloc(userDataRepository: UserDataRepository());
+        if (uid != null) {
+          bloc.add(UserDataLoaded(uid));
+        }
+        return bloc;
+      },
+      child: BlocBuilder<UserDataBloc, UserDataState>(
+        builder: (context, state) {
+          if (state.status == UserDataStatus.loading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (state.status == UserDataStatus.incomplete) {
+            return UserDataForm(userProfile: state.userProfile);
+          }
+
+          return Scaffold(
+            body: _generatePage(),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: (value) => setState(() => _selectedIndex = value),
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.local_activity_rounded),
+                  label: 'Activity',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.account_circle),
+                  label: 'Account',
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Account',
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

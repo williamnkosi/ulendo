@@ -4,7 +4,7 @@ import 'package:ulendo_models/ulendo_models.dart';
 part 'user_data_state.freezed.dart';
 part 'user_data_state.g.dart';
 
-enum UserDataStatus { initial, loading, success, failure }
+enum UserDataStatus { initial, loading, success, incomplete, failure }
 
 /// State holding the current user profile data.
 @freezed

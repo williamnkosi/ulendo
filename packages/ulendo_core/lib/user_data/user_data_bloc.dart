@@ -22,6 +22,7 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
   }
 
   void _onUserDataLoaded(UserDataLoaded event, Emitter<UserDataState> emit) {
+    emit(const UserDataState(status: UserDataStatus.loading));
     _userSubscription?.cancel();
     _userSubscription = _userDataRepository
         .watchUser(event.uid)
@@ -32,13 +33,32 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
   }
 
   void _onUserDataChanged(UserDataChanged event, Emitter<UserDataState> emit) {
-    emit(UserDataState(userProfile: event.user));
+    final user = event.user;
+    final hasMissingRequiredFields =
+        user == null ||
+        user.firstName.trim().isEmpty ||
+        user.lastName.trim().isEmpty ||
+        user.phoneNumber.trim().isEmpty;
+
+    if (hasMissingRequiredFields) {
+      emit(UserDataState(status: UserDataStatus.incomplete, userProfile: user));
+      return;
+    }
+
+    emit(UserDataState(status: UserDataStatus.success, userProfile: user));
   }
 
   Future<void> _onUserDataUpdated(
     UserDataUpdated event,
     Emitter<UserDataState> emit,
   ) async {
+    emit(
+      UserDataState(
+        status: UserDataStatus.loading,
+        userProfile: state.userProfile,
+      ),
+    );
+
     try {
       await _userDataRepository.updateUser(
         uid: event.uid,
@@ -49,7 +69,12 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
       );
       // The real-time listener from watchUser will emit the new state automatically.
     } catch (e) {
-      emit(const UserDataState());
+      emit(
+        UserDataState(
+          status: UserDataStatus.failure,
+          userProfile: state.userProfile,
+        ),
+      );
     }
   }
 
