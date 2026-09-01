@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'driver_shell/driver_shell.dart';
 import 'login_page.dart';
 
 class DriverAppRouter {
@@ -33,13 +34,10 @@ class DriverAppRouter {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/sign-in',
-        builder: (_, __) => const DriverLoginPage(),
-      ),
+      GoRoute(path: '/sign-in', builder: (_, __) => const DriverLoginPage()),
       GoRoute(
         path: '/home',
-        builder: (_, __) => const _PlaceholderPage(title: 'Driver Home'),
+        builder: (_, __) => const DriverShell(),
       ),
     ],
   );
@@ -60,24 +58,5 @@ class _StreamRefreshListenable extends ChangeNotifier {
   void dispose() {
     _subscription.cancel();
     super.dispose();
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  const _PlaceholderPage({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(
-          '$title placeholder',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-      ),
-    );
   }
 }
