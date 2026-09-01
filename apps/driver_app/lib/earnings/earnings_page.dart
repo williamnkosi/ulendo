@@ -8,9 +8,7 @@ class DriverEarningsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Earnings')),
-      body: const Center(
-        child: Text('Driver Earnings'),
-      ),
+      body: const Center(child: Text('Driver Earnings')),
     );
   }
 }

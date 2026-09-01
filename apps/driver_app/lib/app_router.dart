@@ -35,10 +35,7 @@ class DriverAppRouter {
     },
     routes: [
       GoRoute(path: '/sign-in', builder: (_, __) => const DriverLoginPage()),
-      GoRoute(
-        path: '/home',
-        builder: (_, __) => const DriverShell(),
-      ),
+      GoRoute(path: '/home', builder: (_, __) => const DriverShell()),
     ],
   );
 
