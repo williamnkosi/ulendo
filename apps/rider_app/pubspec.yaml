@@ -37,6 +37,7 @@ dependencies:
   go_router: ^18.0.0
   form_validator: ^2.1.1
   google_maps_flutter: ^2.18.0
+  google_maps_places_autocomplete_widgets: ^2.1.2
   ulendo_core:
     path: ../../packages/ulendo_core
   ulendo_models:
