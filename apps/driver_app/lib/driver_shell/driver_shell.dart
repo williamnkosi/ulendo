@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driver_app/account/account_page.dart';
 import 'package:driver_app/earnings/earnings_page.dart';
 import 'package:driver_app/home/home_page.dart';
+import 'package:driver_app/location/location_tracking_bloc.dart';
+import 'package:driver_app/services/location_service.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
 /// The root navigation shell that provides bottom tab navigation.
@@ -35,6 +37,11 @@ class _DriverShellState extends State<DriverShell> {
         BlocProvider<PermissionsBloc>(
           create: (context) =>
               PermissionsBloc()..add(const RequestDriverPermissionsEvent()),
+        ),
+        BlocProvider<LocationTrackingBloc>(
+          create: (context) => LocationTrackingBloc(
+            locationService: LocationService(),
+          ),
         ),
       ],
       child: Scaffold(
