@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
+import 'ride_request.dart';
+
 /// A placeholder screen for the Home feature/tab.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -69,9 +71,13 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16.0),
               child: SizedBox(
                 width: double.infinity,
-                child: TextButton(
+                child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Handle request a ride
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const RideRequestPage(),
+                      ),
+                    );
                   },
                   child: const Text('Request a Ride'),
                 ),
