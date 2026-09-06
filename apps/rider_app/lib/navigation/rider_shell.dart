@@ -49,6 +49,7 @@ class _RiderShellState extends State<RiderShell> {
             return bloc;
           },
         ),
+
         BlocProvider<PermissionsBloc>(
           create: (context) =>
               PermissionsBloc()..add(const RequestRiderPermissionsEvent()),
