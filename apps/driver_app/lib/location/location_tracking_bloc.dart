@@ -11,8 +11,8 @@ class LocationTrackingBloc
   final LocationService _locationService;
 
   LocationTrackingBloc({required LocationService locationService})
-      : _locationService = locationService,
-        super(const LocationTrackingInitial()) {
+    : _locationService = locationService,
+      super(const LocationTrackingInitial()) {
     on<StartLocationTracking>(_onStartLocationTracking);
     on<StopLocationTracking>(_onStopLocationTracking);
     on<UpdateLocationInterval>(_onUpdateLocationInterval);
@@ -28,15 +28,15 @@ class LocationTrackingBloc
     try {
       final interval = event.updateInterval ?? const Duration(seconds: 10);
 
-      await _locationService.startLocationStreaming(
-        updateInterval: interval,
-      );
+      await _locationService.startLocationStreaming(updateInterval: interval);
 
       emit(LocationTrackingActive(updateInterval: interval));
     } catch (e) {
-      emit(LocationTrackingError(
-        'Failed to start location tracking: ${e.toString()}',
-      ));
+      emit(
+        LocationTrackingError(
+          'Failed to start location tracking: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -51,9 +51,11 @@ class LocationTrackingBloc
       await _locationService.stopLocationStreaming();
       emit(const LocationTrackingInactive());
     } catch (e) {
-      emit(LocationTrackingError(
-        'Failed to stop location tracking: ${e.toString()}',
-      ));
+      emit(
+        LocationTrackingError(
+          'Failed to stop location tracking: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -70,9 +72,11 @@ class LocationTrackingBloc
         emit(LocationTrackingActive(updateInterval: event.newInterval));
       }
     } catch (e) {
-      emit(LocationTrackingError(
-        'Failed to update location interval: ${e.toString()}',
-      ));
+      emit(
+        LocationTrackingError(
+          'Failed to update location interval: ${e.toString()}',
+        ),
+      );
     }
   }
 

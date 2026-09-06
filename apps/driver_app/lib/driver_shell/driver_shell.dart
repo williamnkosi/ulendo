@@ -39,9 +39,8 @@ class _DriverShellState extends State<DriverShell> {
               PermissionsBloc()..add(const RequestDriverPermissionsEvent()),
         ),
         BlocProvider<LocationTrackingBloc>(
-          create: (context) => LocationTrackingBloc(
-            locationService: LocationService(),
-          ),
+          create: (context) =>
+              LocationTrackingBloc(locationService: LocationService()),
         ),
       ],
       child: Scaffold(

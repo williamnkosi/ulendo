@@ -17,9 +17,7 @@ class LocationTrackingInitial extends LocationTrackingState {
 class LocationTrackingActive extends LocationTrackingState {
   final Duration updateInterval;
 
-  const LocationTrackingActive({
-    required this.updateInterval,
-  });
+  const LocationTrackingActive({required this.updateInterval});
 
   @override
   List<Object?> get props => [updateInterval];

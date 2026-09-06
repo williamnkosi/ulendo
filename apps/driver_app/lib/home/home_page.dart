@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:driver_app/location/location_tracking_toggle.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
 /// A placeholder screen for the Home feature/tab.
@@ -14,7 +15,10 @@ class _DriverHomePageState extends State<DriverHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(
+        title: const Text('Home'),
+        actions: const [LocationTrackingToggle()],
+      ),
       body: BlocListener<PermissionsBloc, PermissionsState>(
         listener: (context, state) {
           if (state is PermissionsError) {
