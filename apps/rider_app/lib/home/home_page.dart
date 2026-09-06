@@ -38,28 +38,46 @@ class _HomePageState extends State<HomePage> {
             );
           }
         },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Home Screen',
-                style: Theme.of(context).textTheme.titleLarge,
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Home Screen',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    BlocBuilder<PermissionsBloc, PermissionsState>(
+                      builder: (context, state) {
+                        if (state is PermissionsLoading) {
+                          return const CircularProgressIndicator();
+                        }
+                        if (state is PermissionsRiderGranted) {
+                          return const Text('Permissions Granted ✓');
+                        }
+                        return const Text('Checking permissions...');
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              BlocBuilder<PermissionsBloc, PermissionsState>(
-                builder: (context, state) {
-                  if (state is PermissionsLoading) {
-                    return const CircularProgressIndicator();
-                  }
-                  if (state is PermissionsRiderGranted) {
-                    return const Text('Permissions Granted ✓');
-                  }
-                  return const Text('Checking permissions...');
-                },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    // TODO: Handle request a ride
+                  },
+                  child: const Text('Request a Ride'),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
