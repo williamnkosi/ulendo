@@ -9,6 +9,7 @@ import 'package:ulendo_core/user_data/user_data_bloc.dart';
 import 'package:ulendo_core/user_data/user_data_event.dart';
 import 'package:ulendo_core/user_data/user_data_repository.dart';
 import 'package:ulendo_core/user_data/user_data_state.dart';
+import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
 /// The root navigation shell that provides bottom tab navigation.
 class RiderShell extends StatefulWidget {
@@ -37,14 +38,22 @@ class _RiderShellState extends State<RiderShell> {
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    return BlocProvider(
-      create: (context) {
-        final bloc = UserDataBloc(userDataRepository: UserDataRepository());
-        if (uid != null) {
-          bloc.add(UserDataLoaded(uid));
-        }
-        return bloc;
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<UserDataBloc>(
+          create: (context) {
+            final bloc = UserDataBloc(userDataRepository: UserDataRepository());
+            if (uid != null) {
+              bloc.add(UserDataLoaded(uid));
+            }
+            return bloc;
+          },
+        ),
+        BlocProvider<PermissionsBloc>(
+          create: (context) =>
+              PermissionsBloc()..add(const RequestRiderPermissionsEvent()),
+        ),
+      ],
       child: BlocBuilder<UserDataBloc, UserDataState>(
         builder: (context, state) {
           if (state.status == UserDataStatus.loading) {

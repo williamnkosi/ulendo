@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driver_app/account/account_page.dart';
 import 'package:driver_app/earnings/earnings_page.dart';
 import 'package:driver_app/home/home_page.dart';
+import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
 /// The root navigation shell that provides bottom tab navigation.
 class DriverShell extends StatefulWidget {
@@ -28,22 +30,30 @@ class _DriverShellState extends State<DriverShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _generatePage(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (value) => setState(() => _selectedIndex = value),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money),
-            label: 'Earnings',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Account',
-          ),
-        ],
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<PermissionsBloc>(
+          create: (context) =>
+              PermissionsBloc()..add(const RequestDriverPermissionsEvent()),
+        ),
+      ],
+      child: Scaffold(
+        body: _generatePage(),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (value) => setState(() => _selectedIndex = value),
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.attach_money),
+              label: 'Earnings',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Account',
+            ),
+          ],
+        ),
       ),
     );
   }
