@@ -33,9 +33,13 @@ dependencies:
     sdk: flutter
   firebase_core: ^4.1.1
   firebase_auth: ^6.6.1
+  firebase_database: ^12.5.0
   flutter_bloc: ^9.1.1
+  equatable: ^2.0.5
   go_router: ^18.0.0
   form_validator: ^2.1.1
+  google_maps_flutter: ^2.18.0
+  geolocator: ^14.0.3
   ulendo_core:
     path: ../../packages/ulendo_core
   ulendo_models:
