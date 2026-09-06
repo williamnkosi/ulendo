@@ -46,11 +46,10 @@ class UserDataRepository {
     String? profileImageUrl,
   }) async {
     final updates = <String, dynamic>{
-      if (firstName != null) 'firstName': firstName,
-      if (lastName != null) 'lastName': lastName,
-      if (phoneNumber != null) 'phoneNumber': phoneNumber,
-      if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
-      'updatedAt': DateTime.now().toIso8601String(),
+      'firstName': ?firstName,
+      'lastName': ?lastName,
+      'phoneNumber': ?phoneNumber,
+      'profileImageUrl': ?profileImageUrl,
     };
 
     await _userDoc(uid).update(updates);
