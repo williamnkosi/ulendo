@@ -4,3 +4,4 @@
 library;
 
 export 'src/user/user_model.dart';
+export 'models/location_data.dart';
