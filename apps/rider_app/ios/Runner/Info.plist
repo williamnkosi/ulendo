@@ -66,5 +66,13 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need access to your location to find nearby drivers and track your ride.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need access to your location to find nearby drivers and track your ride in real-time.</string>
+	<!-- Camera permission -->
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access for rider verification.</string>
 </dict>
 </plist>
