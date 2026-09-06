@@ -71,6 +71,7 @@ class _UserDataFormState extends State<UserDataForm> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         phoneNumber: _phoneNumberController.text.trim(),
+        profileImageUrl: widget.userProfile?.profileImageUrl,
       ),
     );
   }

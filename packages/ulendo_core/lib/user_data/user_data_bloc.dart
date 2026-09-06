@@ -67,8 +67,32 @@ class UserDataBloc extends Bloc<UserDataEvent, UserDataState> {
         phoneNumber: event.phoneNumber,
         profileImageUrl: event.profileImageUrl,
       );
-      // The real-time listener from watchUser will emit the new state automatically.
+
+      // Add a small delay to allow Firestore to fully commit the update
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Fetch the updated user data to ensure UI is updated immediately
+      final updatedUser = await _userDataRepository.getUser(event.uid);
+
+      if (updatedUser != null) {
+        emit(
+          UserDataState(
+            status: UserDataStatus.success,
+            userProfile: updatedUser,
+          ),
+        );
+      } else {
+        print('Failed to fetch updated user data fadfadsor uid: ${event.uid}');
+        // Still emit success since the write succeeded; the real-time listener will update the state
+        emit(
+          UserDataState(
+            status: UserDataStatus.success,
+            userProfile: state.userProfile,
+          ),
+        );
+      }
     } catch (e) {
+      print('Error updating user data for uid: ${event.uid}, error: $e');
       emit(
         UserDataState(
           status: UserDataStatus.failure,
