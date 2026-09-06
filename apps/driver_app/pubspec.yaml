@@ -39,6 +39,7 @@ dependencies:
   go_router: ^18.0.0
   form_validator: ^2.1.1
   google_maps_flutter: ^2.18.0
+  flutter_geofire: ^2.0.7
   geolocator: ^14.0.3
   ulendo_core:
     path: ../../packages/ulendo_core
