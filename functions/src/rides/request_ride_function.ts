@@ -2,6 +2,7 @@ import { getApps, initializeApp, AppOptions } from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
 import * as functions from "firebase-functions/v1";
 import * as logger from "firebase-functions/logger";
+import { createRideRecord } from "../utils/create-ride-record";
 
 const appOptions: AppOptions = {
   databaseURL: "https://ulendo-dev-default-rtdb.firebaseio.com",
@@ -29,8 +30,9 @@ interface RideRequestResponse {
 
 /**
  * Validate ride request data
- * Checks that pickup and dropoff locations have valid lat, lng (numbers), and address (string)
- * @param data - The ride request data to validate
+ * Checks that pickup and dropoff locations have valid
+ * lat, lng (numbers), and address (string)
+ * @param {unknown} data  - The ride request data to validate
  * @throws HttpsError if validation fails
  */
 function validateRideRequestData(
@@ -114,7 +116,8 @@ function validateRideRequestData(
  * @param data - The ride request data containing pickup and dropoff locations
  * @param context - Firebase context containing authentication info
  *
- * @returns Promise<RideRequestResponse> - Object with success status and message
+ * @returns Promise<RideRequestResponse> -
+ * Object with success status and message
  *
  * @throws HttpsError - "unauthenticated" if user is not authenticated
  * @throws HttpsError - "invalid-argument" if data validation fails
@@ -140,6 +143,16 @@ export const requestRideFunction = functions.https.onCall(
         dropoff: data.dropoff.address,
       });
 
+      // Create ride record with pickup and dropoff data
+      const rideRecord = createRideRecord(
+        data.pickup.lat,
+        data.pickup.lng,
+        data.pickup.address,
+        data.dropoff.lat,
+        data.dropoff.lng,
+        data.dropoff.address,
+      );
+
       const rtdb = getDatabase();
 
       // Generate unique ride ID
@@ -151,6 +164,10 @@ export const requestRideFunction = functions.https.onCall(
         );
       }
       logger.info("Generated rideId", { rideId });
+
+      // Save ride record to database
+      await rtdb.ref(`ride_pickups/${rideId}`).set(rideRecord);
+      logger.info("Ride record saved to database", { rideId });
 
       const response: RideRequestResponse = {
         success: true,
