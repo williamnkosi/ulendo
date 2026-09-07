@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HttpService {
   late Dio _dio;
+  final FirebaseAuth _firebaseAuth;
   static const String baseUrl = ''; // Set your base URL here
 
-  HttpService({String? customBaseUrl}) {
+  HttpService({String? customBaseUrl, FirebaseAuth? firebaseAuth})
+    : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
     _dio = Dio(
       BaseOptions(
         baseUrl: customBaseUrl ?? baseUrl,
@@ -14,19 +17,26 @@ class HttpService {
       ),
     );
 
-    // Add interceptors if needed
+    // Add interceptor to automatically attach Firebase ID token
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          // Add any request preprocessing here
+        onRequest: (options, handler) async {
+          try {
+            final user = _firebaseAuth.currentUser;
+            if (user != null) {
+              final token = await user.getIdToken();
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+          } catch (e) {
+            // Log error but continue with request
+            print('Error getting Firebase token: $e');
+          }
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          // Add any response preprocessing here
           return handler.next(response);
         },
         onError: (error, handler) {
-          // Handle errors globally if needed
           return handler.next(error);
         },
       ),
@@ -40,10 +50,7 @@ class HttpService {
     T Function(dynamic)? fromJson,
   }) async {
     try {
-      final response = await _dio.get(
-        path,
-        queryParameters: queryParameters,
-      );
+      final response = await _dio.get(path, queryParameters: queryParameters);
       return fromJson != null ? fromJson(response.data) : response.data as T;
     } catch (e) {
       rethrow;
@@ -131,7 +138,8 @@ class HttpService {
     _dio.options.baseUrl = url;
   }
 
-  /// Add authorization header
+  /// Add authorization header (optional - Firebase Auth token is automatically used)
+  /// Only use this if you need to override the Firebase token with a custom one
   void setAuthorizationHeader(String token) {
     _dio.options.headers['Authorization'] = 'Bearer $token';
   }
