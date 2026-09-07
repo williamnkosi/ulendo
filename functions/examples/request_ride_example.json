@@ -1,0 +1,12 @@
+{
+  "pickup": {
+    "lat": 40.758,
+    "lng": -73.9855,
+    "address": "Times Square, New York, NY 10036"
+  },
+  "dropoff": {
+    "lat": 40.7128,
+    "lng": -74.006,
+    "address": "Wall Street, New York, NY 10005"
+  }
+}
