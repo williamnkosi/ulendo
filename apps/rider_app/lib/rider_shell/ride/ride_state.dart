@@ -29,10 +29,7 @@ class RideAccepted extends RideState {
   final RideRequest rideRequest;
   final String driverId;
 
-  const RideAccepted({
-    required this.rideRequest,
-    required this.driverId,
-  });
+  const RideAccepted({required this.rideRequest, required this.driverId});
 
   @override
   List<Object?> get props => [rideRequest, driverId];

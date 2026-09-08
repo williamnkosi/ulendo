@@ -12,10 +12,7 @@ class RequestRideEvent extends RideEvent {
   final Location pickup;
   final Location dropoff;
 
-  const RequestRideEvent({
-    required this.pickup,
-    required this.dropoff,
-  });
+  const RequestRideEvent({required this.pickup, required this.dropoff});
 
   @override
   List<Object?> get props => [pickup, dropoff];

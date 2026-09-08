@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'ride_event.dart';
 import 'ride_state.dart';
 import 'ride_repository.dart';
@@ -7,8 +8,8 @@ class RideBloc extends Bloc<RideEvent, RideState> {
   final RideRepository _rideRepository;
 
   RideBloc({required RideRepository rideRepository})
-      : _rideRepository = rideRepository,
-        super(const RideInitial()) {
+    : _rideRepository = rideRepository,
+      super(const RideInitial()) {
     on<RequestRideEvent>(_onRequestRide);
     on<CancelRideEvent>(_onCancelRide);
     on<GetRideStatusEvent>(_onGetRideStatus);
