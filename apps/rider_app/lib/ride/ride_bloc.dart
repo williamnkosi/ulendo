@@ -21,7 +21,16 @@ class RideBloc extends Bloc<RideEvent, RideState> {
     RequestRideEvent event,
     Emitter<RideState> emit,
   ) async {
-    // TODO: Implement requestRide logic
+    emit(const RideLoading());
+    try {
+      final rideRequest = await _rideRepository.requestRide(
+        pickup: event.pickup,
+        dropoff: event.dropoff,
+      );
+      emit(RideRequested(rideRequest: rideRequest));
+    } catch (e) {
+      emit(RideError(message: e.toString()));
+    }
   }
 
   Future<void> _onCancelRide(
