@@ -40,6 +40,7 @@ dependencies:
   form_validator: ^2.1.1
   google_maps_flutter: ^2.18.0
   geolocator: ^14.0.3
+  logging: ^1.3.0
   ulendo_core:
     path: ../../packages/ulendo_core
   ulendo_models:
