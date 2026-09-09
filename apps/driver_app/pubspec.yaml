@@ -33,6 +33,7 @@ dependencies:
     sdk: flutter
   firebase_core: ^4.1.1
   firebase_auth: ^6.6.1
+  cloud_functions: ^6.4.0
   firebase_database: ^12.5.0
   flutter_bloc: ^9.1.1
   equatable: ^2.0.5
