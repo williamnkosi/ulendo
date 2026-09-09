@@ -1,0 +1,82 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Flutter: Get (Rider App)",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["pub", "get"],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/rider_app"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Flutter: Get (Driver App)",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["pub", "get"],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/driver_app"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Flutter: Clean (Rider App)",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["clean"],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/rider_app"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Flutter: Clean (Driver App)",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["clean"],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/driver_app"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Melos: Get All",
+      "type": "shell",
+      "command": "melos",
+      "args": ["bootstrap"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Dart: Analyze (Rider App)",
+      "type": "shell",
+      "command": "dart",
+      "args": ["analyze", "."],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/rider_app"
+      },
+      "problemMatcher": ["$dart"],
+      "group": "build"
+    },
+    {
+      "label": "Dart: Analyze (Driver App)",
+      "type": "shell",
+      "command": "dart",
+      "args": ["analyze", "."],
+      "options": {
+        "cwd": "${workspaceFolder}/apps/driver_app"
+      },
+      "problemMatcher": ["$dart"],
+      "group": "build"
+    }
+  ]
+}
