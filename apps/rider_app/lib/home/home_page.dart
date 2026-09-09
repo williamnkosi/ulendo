@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
+import 'package:rider_app/ride/ride_bloc.dart';
 
 import 'ride_request.dart';
 
@@ -73,9 +74,13 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    final rideBloc = context.read<RideBloc>();
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const RideRequestPage(),
+                        builder: (_) => BlocProvider<RideBloc>.value(
+                          value: rideBloc,
+                          child: const RideRequestPage(),
+                        ),
                       ),
                     );
                   },

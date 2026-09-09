@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
+import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart'
+    as google_places;
 import 'package:logging/logging.dart';
+import 'package:ulendo_models/ulendo_models.dart';
+
+import '../ride/ride_bloc.dart';
+import '../ride/ride_event.dart';
+import '../ride/ride_state.dart';
 
 class RideRequestPage extends StatefulWidget {
   const RideRequestPage({super.key});
@@ -13,7 +20,7 @@ class RideRequestPage extends StatefulWidget {
 class _RideRequestPageState extends State<RideRequestPage> {
   final logger = Logger('RiderHomeRequestForm');
 
-  final _config = GoogleApiConfig(
+  final _config = google_places.GoogleApiConfig(
     apiKey: dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '',
     fetchPlaceDetailsWithCoordinates: true,
   );
@@ -22,8 +29,8 @@ class _RideRequestPageState extends State<RideRequestPage> {
   final _dropoffController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  Prediction? _pickUpPrediction;
-  Prediction? _dropOffPrediction;
+  google_places.Prediction? _pickUpPrediction;
+  google_places.Prediction? _dropOffPrediction;
 
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
@@ -53,7 +60,7 @@ class _RideRequestPageState extends State<RideRequestPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Pickup Location Field
-              GooglePlacesAutoCompleteTextFormField(
+              google_places.GooglePlacesAutoCompleteTextFormField(
                 config: _config,
                 textEditingController: _pickupController,
                 decoration: const InputDecoration(
@@ -86,7 +93,7 @@ class _RideRequestPageState extends State<RideRequestPage> {
                     'Lat: ${prediction.lat}, Lng: ${prediction.lng}',
                   );
                 },
-                onSuggestionClicked: (Prediction prediction) {
+                onSuggestionClicked: (google_places.Prediction prediction) {
                   _pickupController.text = prediction.description ?? '';
                   _pickUpPrediction = prediction;
                 },
@@ -95,7 +102,7 @@ class _RideRequestPageState extends State<RideRequestPage> {
               const SizedBox(height: 24),
 
               // Drop-off Location Field
-              GooglePlacesAutoCompleteTextFormField(
+              google_places.GooglePlacesAutoCompleteTextFormField(
                 config: _config,
                 textEditingController: _dropoffController,
                 decoration: const InputDecoration(
@@ -128,7 +135,7 @@ class _RideRequestPageState extends State<RideRequestPage> {
                     'Lat: ${prediction.lat}, Lng: ${prediction.lng}',
                   );
                 },
-                onSuggestionClicked: (Prediction prediction) {
+                onSuggestionClicked: (google_places.Prediction prediction) {
                   _dropoffController.text = prediction.description ?? '';
                   _dropOffPrediction = prediction;
                 },
@@ -137,40 +144,91 @@ class _RideRequestPageState extends State<RideRequestPage> {
               const SizedBox(height: 24),
 
               // Search/Start Button
-              ElevatedButton(
-                onPressed: () {
-                  logger.info('Search Rides button pressed');
-
-                  // Check if predictions are set
-                  if (_pickUpPrediction == null || _dropOffPrediction == null) {
-                    logger.warning(
-                      'Please select both pickup and drop-off locations',
+              BlocListener<RideBloc, RideState>(
+                listener: (context, state) {
+                  if (state is RideError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: ${state.message}'),
+                        backgroundColor: Colors.red,
+                      ),
                     );
+                  } else if (state is RideRequested) {
+                    logger.info('Ride requested successfully');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          'Please select both pickup and drop-off locations',
+                        content: Text('Ride request submitted!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder<RideBloc, RideState>(
+                  builder: (context, state) {
+                    final isLoading = state is RideLoading;
+
+                    return ElevatedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              logger.info('Search Rides button pressed');
+
+                              // Check if predictions are set
+                              if (_pickUpPrediction == null ||
+                                  _dropOffPrediction == null) {
+                                logger.warning(
+                                  'Please select both pickup and drop-off locations',
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please select both pickup and drop-off locations',
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              if (_formKey.currentState!.validate()) {
+                                logger.info(
+                                  'Form is valid, dispatching RequestRideEvent',
+                                );
+
+                                final pickupLocation = Location(
+                                  lat: double.parse(_pickUpPrediction!.lat!),
+                                  lng: double.parse(_pickUpPrediction!.lng!),
+                                  address: _pickUpPrediction!.description!,
+                                );
+
+                                final dropoffLocation = Location(
+                                  lat: double.parse(_dropOffPrediction!.lat!),
+                                  lng: double.parse(_dropOffPrediction!.lng!),
+                                  address: _dropOffPrediction!.description!,
+                                );
+
+                                context.read<RideBloc>().add(
+                                  RequestRideEvent(
+                                    pickup: pickupLocation,
+                                    dropoff: dropoffLocation,
+                                  ),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: Text(
+                        isLoading ? 'Requesting...' : 'Search Rides',
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     );
-                    return;
-                  }
-
-                  if (_formKey.currentState!.validate()) {
-                    logger.info('Form is valid');
-                    logger.info('Pickup: ${_pickUpPrediction?.description}');
-                    logger.info('Dropoff: ${_dropOffPrediction?.description}');
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                child: const Text(
-                  'Search Rides',
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  },
                 ),
               ),
             ],
