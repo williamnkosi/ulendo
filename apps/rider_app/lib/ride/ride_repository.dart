@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:ulendo_core/ulendo_core.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:ulendo_models/ulendo_models.dart';
-
-import '../core/constants/api_constants.dart';
 
 abstract class RideRepository extends Equatable {
   Future<RideRequest> requestRide({
@@ -20,13 +18,13 @@ abstract class RideRepository extends Equatable {
 }
 
 class RideRepositoryImpl extends RideRepository {
-  final HttpService _httpService;
+  final FirebaseFunctions _functions;
 
-  RideRepositoryImpl({required HttpService httpService})
-    : _httpService = httpService;
+  RideRepositoryImpl({FirebaseFunctions? functions})
+    : _functions = functions ?? FirebaseFunctions.instance;
 
   @override
-  List<Object?> get props => [_httpService];
+  List<Object?> get props => [_functions];
 
   @override
   Future<RideRequest> requestRide({
@@ -34,15 +32,33 @@ class RideRepositoryImpl extends RideRepository {
     required Location dropoff,
   }) async {
     try {
-      final rideRequest = RideRequest(pickup: pickup, dropoff: dropoff);
+      final callable = _functions.httpsCallable('requestRideFunction');
+      final response = await callable.call({
+        'pickup': pickup.toJson(),
+        'dropoff': dropoff.toJson(),
+      });
 
-      final response = await _httpService.post<Map<String, dynamic>>(
-        '${ApiConstants.baseUrl}${ApiConstants.requestRide}',
-        data: rideRequest.toJson(),
-      );
+      // Function returns {success, message, rideId, pickup, dropoff}
+      // final data = response.data as Map<String, dynamic>;
 
-      // Parse the response and return RideRequest
-      return RideRequest.fromJson(response);
+      // // Parse pickup and dropoff from response
+      // final pickupData = data['pickup'] as Map<String, dynamic>;
+      // final dropoffData = data['dropoff'] as Map<String, dynamic>;
+
+      // final pickupLocation = Location(
+      //   lat: pickupData['lat'] as double,
+      //   lng: pickupData['lng'] as double,
+      //   address: pickupData['address'] as String,
+      // );
+
+      // final dropoffLocation = Location(
+      //   lat: dropoffData['lat'] as double,
+      //   lng: dropoffData['lng'] as double,
+      //   address: dropoffData['address'] as String,
+      // );
+
+      final rideRequest = RideRequest.fromJson(response.data);
+      return rideRequest;
     } catch (e) {
       throw Exception('Failed to request ride: $e');
     }

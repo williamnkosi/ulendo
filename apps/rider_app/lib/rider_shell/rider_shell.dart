@@ -57,9 +57,7 @@ class _RiderShellState extends State<RiderShell> {
               PermissionsBloc()..add(const RequestRiderPermissionsEvent()),
         ),
         BlocProvider<RideBloc>(
-          create: (context) => RideBloc(
-            rideRepository: RideRepositoryImpl(httpService: HttpService()),
-          ),
+          create: (context) => RideBloc(rideRepository: RideRepositoryImpl()),
         ),
       ],
       child: BlocBuilder<UserDataBloc, UserDataState>(
