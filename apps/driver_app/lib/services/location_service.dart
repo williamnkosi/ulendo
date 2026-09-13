@@ -103,7 +103,7 @@ class LocationService {
     }
   }
 
-  /// Stop location streaming and remove from GeoFire
+  /// Stop location streaming and remove driver from index
   Future<void> stopLocationStreaming() async {
     try {
       // Cancel the timer
@@ -113,13 +113,10 @@ class LocationService {
       // Remove from GeoFire
       await Geofire.removeLocation(_driverId);
 
-      // Update driver status to offline
-      await _driverRef.update({
-        'status': 'offline',
-        'timestamp': ServerValue.timestamp,
-      });
+      // Remove driver record from the index
+      await _driverRef.remove();
 
-      print('Location streaming stopped and driver removed from GeoFire');
+      print('Location streaming stopped and driver removed from index');
     } catch (e) {
       throw LocationServiceException('Failed to stop location streaming: $e');
     }
