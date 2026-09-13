@@ -1,25 +1,27 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:ulendo_models/models/location_data.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-/// Service to handle real-time location tracking and Firebase Realtime Database uploads
+/// Service to handle real-time location tracking and Firebase Realtime Database uploads with GeoFire
 class LocationService {
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   late final String _driverId;
-  late final DatabaseReference _locationRef;
+  late final DatabaseReference _driverRef;
 
   // Timer for periodic location updates
   Timer? _locationUpdateTimer;
 
   // Configuration
   static const Duration _defaultUpdateInterval = Duration(seconds: 10);
+  static const String _geoFirePath = 'drivers'; // GeoFire collection path
 
   LocationService() {
     _driverId = _auth.currentUser?.uid ?? '';
@@ -27,17 +29,22 @@ class LocationService {
     if (_driverId.isEmpty) {
       print('WARNING: Driver ID is empty. User may not be authenticated.');
     }
-    _locationRef = _database.ref('drivers/$_driverId/location');
+    _driverRef = _database.ref('drivers/$_driverId');
   }
 
-  /// Initialize location service and start streaming
+  /// Initialize location service and GeoFire
   Future<void> initialize() async {
     try {
-      print('Initializing LocationService...');
+      print('Initializing LocationService with GeoFire...');
       // Check location permissions
       print('Checking location permissions...');
       await _checkLocationPermissions();
       print('Location permissions granted');
+
+      // Initialize GeoFire with the drivers collection path
+      print('Initializing GeoFire...');
+      await Geofire.initialize(_geoFirePath);
+      print('GeoFire initialized successfully');
 
       // Test database connection
       print('Testing database connection...');
@@ -96,28 +103,50 @@ class LocationService {
     }
   }
 
-  /// Stop location streaming
+  /// Stop location streaming and remove from GeoFire
   Future<void> stopLocationStreaming() async {
     try {
       // Cancel the timer
       _locationUpdateTimer?.cancel();
       _locationUpdateTimer = null;
-      // Optional: Clear location from database
-      await _locationRef.remove();
+
+      // Remove from GeoFire
+      await Geofire.removeLocation(_driverId);
+
+      // Update driver status to offline
+      await _driverRef.update({
+        'status': 'offline',
+        'timestamp': ServerValue.timestamp,
+      });
+
+      print('Location streaming stopped and driver removed from GeoFire');
     } catch (e) {
       throw LocationServiceException('Failed to stop location streaming: $e');
     }
   }
 
-  /// Upload location data to Firebase Realtime Database
+  /// Upload location data to Firebase Realtime Database using GeoFire
+  /// GeoFire stores location with geohashing for efficient proximity queries
   Future<void> _uploadLocationToDatabase(LocationData locationData) async {
     try {
-      await _locationRef.set({
-        'driverId': locationData.driverId,
+      // Use GeoFire to set location (handles geohashing internally)
+      await Geofire.setLocation(
+        _driverId,
+        locationData.latitude,
+        locationData.longitude,
+      );
+
+      // Also store driver metadata separately for queries
+      await _driverRef.update({
         'latitude': locationData.latitude,
         'longitude': locationData.longitude,
+        'status': 'available',
         'timestamp': ServerValue.timestamp,
       });
+
+      print(
+        'Location uploaded successfully: ${locationData.latitude}, ${locationData.longitude}',
+      );
     } catch (e) {
       throw LocationServiceException('Failed to upload location: $e');
     }
@@ -168,10 +197,9 @@ class LocationService {
   Future<void> _testDatabaseConnection() async {
     try {
       print('Testing Firebase database connection...');
-      // Just try to set a test value to verify connection
-      // This is more reliable than checking .info/connected
-      await _locationRef
-          .set({'timestamp': ServerValue.timestamp})
+      // Test by attempting to update driver reference
+      await _driverRef
+          .update({'timestamp': ServerValue.timestamp})
           .timeout(const Duration(seconds: 5));
       print('Database connection test successful');
     } catch (e) {
@@ -184,14 +212,22 @@ class LocationService {
   /// Get driver's location history from Firebase
   Future<List<LocationData>> getLocationHistory({int limit = 100}) async {
     try {
-      final snapshot = await _locationRef.limitToLast(limit).get();
+      // Fetch driver's current metadata
+      final snapshot = await _driverRef.get();
 
       if (!snapshot.exists) {
         return [];
       }
 
-      // Parse location data from snapshot
-      return _parseLocationSnapshot(snapshot);
+      // Return current location as single-item history
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      return [
+        LocationData(
+          driverId: _driverId,
+          latitude: (data['latitude'] as num?)?.toDouble() ?? 0.0,
+          longitude: (data['longitude'] as num?)?.toDouble() ?? 0.0,
+        ),
+      ];
     } catch (e) {
       throw LocationServiceException('Failed to fetch location history: $e');
     }
@@ -199,7 +235,7 @@ class LocationService {
 
   /// Listen to location updates from Firebase (real-time sync)
   Stream<LocationData> listenToLocationUpdates() {
-    return _locationRef.onValue.map((event) {
+    return _driverRef.onValue.map((event) {
       if (event.snapshot.value == null) {
         throw LocationServiceException('No location data available');
       }
@@ -207,33 +243,11 @@ class LocationService {
       final data = event.snapshot.value as Map<dynamic, dynamic>;
 
       return LocationData(
-        driverId: data['driverId'] ?? _driverId,
-        latitude: (data['latitude'] as num).toDouble(),
-        longitude: (data['longitude'] as num).toDouble(),
+        driverId: _driverId,
+        latitude: (data['latitude'] as num?)?.toDouble() ?? 0.0,
+        longitude: (data['longitude'] as num?)?.toDouble() ?? 0.0,
       );
     });
-  }
-
-  /// Parse location snapshot
-  List<LocationData> _parseLocationSnapshot(DataSnapshot snapshot) {
-    final locations = <LocationData>[];
-
-    if (snapshot.value is Map) {
-      final data = snapshot.value as Map<dynamic, dynamic>;
-      data.forEach((key, value) {
-        if (value is Map<dynamic, dynamic>) {
-          locations.add(
-            LocationData(
-              driverId: value['driverId'] ?? _driverId,
-              latitude: (value['latitude'] as num).toDouble(),
-              longitude: (value['longitude'] as num).toDouble(),
-            ),
-          );
-        }
-      });
-    }
-
-    return locations;
   }
 
   /// Update the location update interval while streaming
