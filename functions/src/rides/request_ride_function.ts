@@ -26,6 +26,17 @@ interface RideRequestData {
 interface RideRequestResponse {
   success: boolean;
   message: string;
+  rideId: string;
+  pickup?: {
+    lat: number;
+    lng: number;
+    address: string;
+  };
+  dropoff?: {
+    lat: number;
+    lng: number;
+    address: string;
+  };
 }
 
 /**
@@ -124,8 +135,11 @@ function validateRideRequestData(
  */
 export const requestRideFunction = functions.https.onCall(
   async (data: unknown, context) => {
+    logger.info("requestRideFunction called", { data });
+
     // Check if user is authenticated
     if (!context.auth) {
+      logger.error("User not authenticated");
       throw new functions.https.HttpsError(
         "unauthenticated",
         "User must be authenticated to request a ride.",
@@ -133,8 +147,23 @@ export const requestRideFunction = functions.https.onCall(
     }
 
     const userId: string = context.auth.uid;
+    logger.info("User authenticated", { userId });
 
     try {
+      const rtdb = getDatabase();
+
+      // Check if user already has an active ride
+      const activeRideSnapshot = await rtdb.ref(`active_rides/${userId}`).get();
+      if (activeRideSnapshot.exists()) {
+        logger.warn("User already has an active ride", { userId });
+        throw new functions.https.HttpsError(
+          "failed-precondition",
+          "You already have an active ride. Please complete or cancel " +
+            "it before requesting a new one.",
+        );
+      }
+      logger.info("No active ride found for user", { userId });
+
       // Validate request data
       validateRideRequestData(data);
       logger.info("Ride request data validated", {
@@ -142,6 +171,18 @@ export const requestRideFunction = functions.https.onCall(
         pickup: data.pickup.address,
         dropoff: data.dropoff.address,
       });
+
+      // Generate unique ride ID
+      const rideIdRef = rtdb.ref("rides").push();
+      const rideId = rideIdRef.key;
+      if (!rideId) {
+        logger.error("Failed to generate ride ID");
+        throw new functions.https.HttpsError(
+          "internal",
+          "Failed to generate ride ID",
+        );
+      }
+      logger.info("Generated rideId", { rideId });
 
       // Create ride record with pickup and dropoff data
       const rideRecord = createRideRecord(
@@ -151,32 +192,42 @@ export const requestRideFunction = functions.https.onCall(
         data.dropoff.lat,
         data.dropoff.lng,
         data.dropoff.address,
+        userId,
+        rideId,
       );
+      logger.info("Ride record created", { rideRecord });
 
-      const rtdb = getDatabase();
+      // Save ride record to database under active_rides/{userId}
+      await rtdb.ref(`active_rides/${userId}`).set(rideRecord);
+      logger.info("Ride record saved to active_rides", { userId, rideId });
 
-      // Generate unique ride ID
-      const rideId = rtdb.ref("rides").push().key || "";
-      if (!rideId) {
-        throw new functions.https.HttpsError(
-          "internal",
-          "Failed to generate ride ID",
-        );
-      }
-      logger.info("Generated rideId", { rideId });
-
-      // Save ride record to database
-      await rtdb.ref(`ride_pickups/${rideId}`).set(rideRecord);
-      logger.info("Ride record saved to database", { rideId });
-
+      // Ensure response is plain JSON-serializable object with all data
       const response: RideRequestResponse = {
         success: true,
         message: "Ride request received successfully",
+        rideId: String(rideId),
+        pickup: {
+          lat: Number(data.pickup.lat),
+          lng: Number(data.pickup.lng),
+          address: String(data.pickup.address),
+        },
+        dropoff: {
+          lat: Number(data.dropoff.lat),
+          lng: Number(data.dropoff.lng),
+          address: String(data.dropoff.address),
+        },
       };
 
+      logger.info("Returning success response", response);
       return response;
     } catch (error) {
+      logger.error("Caught error in try block", { error });
+
       if (error instanceof functions.https.HttpsError) {
+        logger.error("Rethrowing HttpsError", {
+          code: error.code,
+          message: error.message,
+        });
         throw error;
       }
 
