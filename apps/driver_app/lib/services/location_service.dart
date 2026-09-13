@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -124,6 +125,8 @@ class LocationService {
 
   /// Upload location data to Firebase Realtime Database using GeoFire
   /// GeoFire stores location with geohashing for efficient proximity queries
+  /// Also includes the driver's FCM token for push notifications
+  /// Throws if FCM token is not available
   Future<void> _uploadLocationToDatabase(LocationData locationData) async {
     try {
       // Use GeoFire to set location (handles geohashing internally)
@@ -133,13 +136,25 @@ class LocationService {
         locationData.longitude,
       );
 
-      // Also store driver metadata separately for queries
-      await _driverRef.update({
+      // Get current FCM token
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+
+      if (fcmToken == null || fcmToken.isEmpty) {
+        throw LocationServiceException(
+          'FCM token not available. Driver cannot receive ride notifications.',
+        );
+      }
+
+      // Store driver metadata separately for queries
+      final updateData = {
         'latitude': locationData.latitude,
         'longitude': locationData.longitude,
         'status': 'available',
+        'fcmToken': fcmToken,
         'timestamp': ServerValue.timestamp,
-      });
+      };
+
+      await _driverRef.update(updateData);
 
       print(
         'Location uploaded successfully: ${locationData.latitude}, ${locationData.longitude}',
