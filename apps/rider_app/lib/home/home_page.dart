@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
+import 'package:rider_app/ride/ride_bloc.dart';
+
+import 'ride_request.dart';
 
 /// A placeholder screen for the Home feature/tab.
 class HomePage extends StatefulWidget {
@@ -38,28 +41,54 @@ class _HomePageState extends State<HomePage> {
             );
           }
         },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Home Screen',
-                style: Theme.of(context).textTheme.titleLarge,
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Home Screen',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 16),
+                    BlocBuilder<PermissionsBloc, PermissionsState>(
+                      builder: (context, state) {
+                        if (state is PermissionsLoading) {
+                          return const CircularProgressIndicator();
+                        }
+                        if (state is PermissionsRiderGranted) {
+                          return const Text('Permissions Granted ✓');
+                        }
+                        return const Text('Checking permissions...');
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              BlocBuilder<PermissionsBloc, PermissionsState>(
-                builder: (context, state) {
-                  if (state is PermissionsLoading) {
-                    return const CircularProgressIndicator();
-                  }
-                  if (state is PermissionsRiderGranted) {
-                    return const Text('Permissions Granted ✓');
-                  }
-                  return const Text('Checking permissions...');
-                },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final rideBloc = context.read<RideBloc>();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider<RideBloc>.value(
+                          value: rideBloc,
+                          child: const RideRequestPage(),
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Request a Ride'),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

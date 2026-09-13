@@ -17,6 +17,7 @@ dependencies:
   cloud_firestore: ^6.9.0
   flutter_bloc: ^9.1.1
   bloc: ^9.2.1
+  dio: ^5.11.1
   ulendo_models:
     path: ../ulendo_models
 

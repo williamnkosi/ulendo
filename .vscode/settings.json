@@ -1,0 +1,15 @@
+{
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "Dart-Code.dart-code"
+  },
+  "dart.enableSdkFormatter": true,
+  "dart.flutterSdkPath": "${env:FLUTTER_HOME}",
+  "dart.sdkPath": "${env:DART_SDK}",
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.dart_tool": true,
+    "**/build": true,
+    "**/.fvm": true
+  }
+}

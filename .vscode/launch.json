@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Rider App",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/rider_app/lib/main.dart",
+      "args": ["-d", "emulator-5554"],
+      "console": "integrated"
+    },
+    {
+      "name": "Driver App",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/driver_app/lib/main.dart",
+      "args": ["-d", "emulator-5554"],
+      "console": "integrated"
+    },
+    {
+      "name": "Rider App (Select Device)",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/rider_app/lib/main.dart",
+      "console": "integrated"
+    },
+    {
+      "name": "Driver App (Select Device)",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/driver_app/lib/main.dart",
+      "console": "integrated"
+    }
+  ]
+}

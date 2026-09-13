@@ -9,6 +9,7 @@
 
 import { setGlobalOptions } from "firebase-functions";
 import { onUserCreatedFunction } from "./user/on_user_created_function";
+import { requestRideFunction } from "./rides/request_ride_function";
 // import {onRequest} from "firebase-functions/https";
 // import * as logger from "firebase-functions/logger";
 
@@ -27,7 +28,7 @@ import { onUserCreatedFunction } from "./user/on_user_created_function";
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
 
-export { onUserCreatedFunction };
+export { onUserCreatedFunction, requestRideFunction };
 
 // export const helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});

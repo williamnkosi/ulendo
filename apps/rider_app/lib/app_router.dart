@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'login_page.dart';
-import 'navigation/rider_shell.dart';
+import 'rider_shell/rider_shell.dart';
 
 class RiderAppRouter {
   RiderAppRouter() {
