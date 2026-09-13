@@ -12,3 +12,5 @@ export 'services/permissions_service.dart';
 export 'services/http_service.dart';
 
 export 'permissions/permissions_bloc.dart';
+
+export 'messaging/messaging.dart';
