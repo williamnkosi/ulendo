@@ -10,6 +10,8 @@
 import { setGlobalOptions } from "firebase-functions";
 import { onUserCreatedFunction } from "./user/on_user_created_function";
 import { requestRideFunction } from "./rides/request_ride_function";
+// eslint-disable-next-line max-len
+import { findAvailableDriverFunction } from "./rides/find_available_driver_function";
 // import {onRequest} from "firebase-functions/https";
 // import * as logger from "firebase-functions/logger";
 
@@ -28,7 +30,11 @@ import { requestRideFunction } from "./rides/request_ride_function";
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
 
-export { onUserCreatedFunction, requestRideFunction };
+export {
+  onUserCreatedFunction,
+  requestRideFunction,
+  findAvailableDriverFunction,
+};
 
 // export const helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});
