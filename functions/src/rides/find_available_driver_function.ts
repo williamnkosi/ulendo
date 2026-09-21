@@ -1,8 +1,11 @@
 import { getApps, initializeApp, AppOptions } from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
+import { getMessaging } from "firebase-admin/messaging";
 import * as functions from "firebase-functions/v1";
 import * as logger from "firebase-functions/logger";
-import { geohashForLocation, distanceBetween } from "geofire-common";
+import { distanceBetween } from "geofire-common";
+import { Driver, RideData, DriverStatus, DriverNotification } from "../types";
+import { calculateGeohash } from "../utils/calculate-geohash";
 
 const appOptions: AppOptions = {
   databaseURL: "https://ulendo-dev-default-rtdb.firebaseio.com",
@@ -12,34 +15,13 @@ if (getApps().length === 0) {
   initializeApp(appOptions);
 }
 
-interface Driver {
-  driverId: string;
-  latitude: number;
-  longitude: number;
-  geohash: string;
-}
-
-interface RideData {
-  pickup: {
-    location: [number, number];
-    geohash: string;
-    address: string;
-  };
-  dropoff: {
-    location: [number, number];
-    address: string;
-  };
-  userId: string;
-  status: string;
-}
-
 /**
  * Calculate distance between two coordinates in kilometers
- * @param lat1 Latitude of point 1
- * @param lng1 Longitude of point 1
- * @param lat2 Latitude of point 2
- * @param lng2 Longitude of point 2
- * @returns Distance in kilometers
+ * @param {number} lat1 Latitude of point 1
+ * @param {number} lng1 Longitude of point 1
+ * @param {number} lat2 Latitude of point 2
+ * @param {number} lng2 Longitude of point 2
+ * @return {number} Distance in kilometers
  */
 function calculateDistance(
   lat1: number,
@@ -53,10 +35,11 @@ function calculateDistance(
 /**
  * Check if two geohashes are nearby (within search radius)
  * Uses geohash prefix matching for quick proximity checks
- * @param driverGeohash Driver's geohash
- * @param rideGeohash Ride pickup geohash
- * @param precision Geohash precision to compare (higher = smaller area)
- * @returns True if geohashes match at given precision
+ * @param {string} driverGeohash Driver's geohash
+ * @param {string} rideGeohash Ride pickup geohash
+ * @param {number} precision Geohash precision to compare
+ * (higher = smaller area)
+ * @return {boolean} True if geohashes match at given precision
  */
 function isNearbyGeohash(
   driverGeohash: string,
@@ -109,26 +92,35 @@ export const findAvailableDriverFunction = functions.database
         return Promise.resolve();
       }
 
-      const driversData = driversSnapshot.val() as Record<string, any>;
+      const driversData = driversSnapshot.val() as Record<string, DriverStatus>;
 
       // Filter nearby drivers using geohash
       const nearbyDrivers: Driver[] = [];
 
       for (const driverId in driversData) {
-        const driver = driversData[driverId];
-
-        // Skip if driver doesn't have required fields
-        if (!driver.latitude || !driver.longitude || !driver.geohash) {
+        // Use Object.prototype.hasOwnProperty.call() for safer checking
+        if (!Object.prototype.hasOwnProperty.call(driversData, driverId)) {
           continue;
         }
 
+        const driver = driversData[driverId];
+
+        // Skip if driver doesn't have required location fields
+        if (!driver.latitude || !driver.longitude) {
+          continue;
+        }
+
+        // Use geohash from driver data, or calculate if not present
+        const driverGeohash =
+          driver.g || calculateGeohash(driver.latitude, driver.longitude, 4);
+
         // Check if driver is nearby using geohash
-        if (isNearbyGeohash(driver.geohash, rideGeohash, 4)) {
+        if (isNearbyGeohash(driverGeohash, rideGeohash, 4)) {
           nearbyDrivers.push({
             driverId,
             latitude: driver.latitude,
             longitude: driver.longitude,
-            geohash: driver.geohash,
+            geohash: driverGeohash,
           });
         }
       }
@@ -192,6 +184,58 @@ export const findAvailableDriverFunction = functions.database
         rideId,
         driverId: closestDriver.driverId,
       });
+
+      // Fetch the driver's FCM token to send notification
+      try {
+        const driverRef = db.ref(`drivers/${closestDriver.driverId}`);
+        const driverSnapshot = await driverRef.get();
+        const driverData = driverSnapshot.val() as DriverStatus;
+
+        if (driverData && driverData.fcmToken) {
+          const fcmToken = driverData.fcmToken;
+
+          // Compose notification message
+          const message: DriverNotification = {
+            notification: {
+              title: "New Ride Request",
+              body: `Pickup: ${rideData.pickup.address}`,
+            },
+            data: {
+              rideId,
+              driverId: closestDriver.driverId,
+              pickupAddress: rideData.pickup.address,
+              dropoffAddress: rideData.dropoff.address,
+              distanceToPickup: minDistance.toFixed(2),
+              pickupLat: pickupLat.toString(),
+              pickupLng: pickupLng.toString(),
+              status: "driver_assigned",
+            },
+            token: fcmToken,
+          };
+
+          // Send the message
+          const messaging = getMessaging();
+          const messageId = await messaging.send(message);
+
+          logger.info("FCM notification sent to driver", {
+            rideId,
+            driverId: closestDriver.driverId,
+            messageId,
+          });
+        } else {
+          logger.warn("Driver FCM token not found", {
+            rideId,
+            driverId: closestDriver.driverId,
+          });
+        }
+      } catch (fcmError) {
+        logger.error("Error sending FCM notification", {
+          rideId,
+          driverId: closestDriver.driverId,
+          error:
+            fcmError instanceof Error ? fcmError.message : String(fcmError),
+        });
+      }
 
       return Promise.resolve();
     } catch (error) {
