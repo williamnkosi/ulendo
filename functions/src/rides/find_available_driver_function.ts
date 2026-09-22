@@ -4,7 +4,13 @@ import { getMessaging } from "firebase-admin/messaging";
 import * as functions from "firebase-functions/v1";
 import * as logger from "firebase-functions/logger";
 import { distanceBetween } from "geofire-common";
-import { Driver, RideData, DriverStatus, DriverNotification } from "../types";
+import {
+  Driver,
+  RideData,
+  DriverStatus,
+  DriverNotification,
+  DriverStatusEnum,
+} from "../types";
 import { calculateGeohash } from "../utils/calculate-geohash";
 
 const appOptions: AppOptions = {
@@ -110,6 +116,11 @@ export const findAvailableDriverFunction = functions.database
           continue;
         }
 
+        // Skip if driver is not available (has pending offer, offline, etc.)
+        if (driver.status !== DriverStatusEnum.AVAILABLE) {
+          continue;
+        }
+
         // Use geohash from driver data, or calculate if not present
         const driverGeohash =
           driver.g || calculateGeohash(driver.latitude, driver.longitude, 4);
@@ -175,7 +186,7 @@ export const findAvailableDriverFunction = functions.database
       // Assign the closest driver to the ride
       await db.ref(`active_rides/${rideId}`).update({
         assignedDriver: closestDriver.driverId,
-        status: "driver_assigned",
+        status: DriverStatusEnum.DRIVER_OFFER_PENDING,
         distanceToPickup: parseFloat(minDistance.toFixed(2)),
         assignedAt: new Date().toISOString(),
       });
@@ -208,7 +219,6 @@ export const findAvailableDriverFunction = functions.database
               distanceToPickup: minDistance.toFixed(2),
               pickupLat: pickupLat.toString(),
               pickupLng: pickupLng.toString(),
-              status: "driver_assigned",
             },
             token: fcmToken,
           };

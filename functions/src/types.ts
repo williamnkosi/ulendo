@@ -1,12 +1,22 @@
 import { Message } from "firebase-admin/messaging";
 
 /**
+ * Driver status enum
+ */
+export enum DriverStatusEnum {
+  AVAILABLE = "available",
+  DRIVER_OFFER_PENDING = "driver_offer_pending",
+  ON_RIDE = "on_ride",
+  OFFLINE = "offline",
+}
+
+/**
  * Driver status and location data sent from the driver app to Firestore
  */
 export interface DriverStatus {
   latitude: number;
   longitude: number;
-  status: string;
+  status: string; // "available", "driver_offer_pending", "on_ride", "offline"
   fcmToken?: string;
   timestamp: string | number; // Server timestamp or ISO string
   g?: string; // Geohash (set as priority on Firebase)
