@@ -111,13 +111,7 @@ export const findAvailableDriverFunction = functions.database
       });
 
       // Send FCM notification
-      await sendRideNotification(
-        db,
-        rideId,
-        closestDriver.driverId,
-        rideData,
-        minDistance,
-      );
+      await sendRideNotification(db, rideId, closestDriver.driverId, rideData);
 
       return Promise.resolve();
     } catch (error) {
@@ -233,7 +227,6 @@ async function sendRideNotification(
   rideId: string,
   driverId: string,
   rideData: RideData,
-  distanceToPickup: number,
 ): Promise<void> {
   try {
     const driverRef = db.ref(`drivers/${driverId}`);
@@ -258,12 +251,6 @@ async function sendRideNotification(
       },
       data: {
         rideId,
-        driverId,
-        pickupAddress: rideData.pickup.address,
-        dropoffAddress: rideData.dropoff.address,
-        distanceToPickup: distanceToPickup.toFixed(2),
-        pickupLat: rideData.pickup.location[0].toString(),
-        pickupLng: rideData.pickup.location[1].toString(),
       },
       token: fcmToken,
     };
