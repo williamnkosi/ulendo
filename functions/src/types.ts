@@ -1,6 +1,19 @@
 import { Message } from "firebase-admin/messaging";
 
 /**
+ * Ride status enum
+ */
+export enum RideStatusEnum {
+  SEARCHING = "searching",
+  DRIVER_OFFERED = "driver_offered",
+  DRIVER_ACCEPTED = "driver_accepted",
+  DRIVER_REJECTED = "driver_rejected",
+  IN_TRANSIT = "in_transit",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+}
+
+/**
  * Driver status enum
  */
 export enum DriverStatusEnum {

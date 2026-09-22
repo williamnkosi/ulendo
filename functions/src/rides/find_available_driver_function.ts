@@ -1,5 +1,6 @@
+/* eslint-disable operator-linebreak */
 import { getApps, initializeApp, AppOptions } from "firebase-admin/app";
-import { getDatabase } from "firebase-admin/database";
+import { Database, getDatabase } from "firebase-admin/database";
 import { getMessaging } from "firebase-admin/messaging";
 import * as functions from "firebase-functions/v1";
 import * as logger from "firebase-functions/logger";
@@ -10,6 +11,7 @@ import {
   DriverStatus,
   DriverNotification,
   DriverStatusEnum,
+  RideStatusEnum,
 } from "../types";
 import { calculateGeohash } from "../utils/calculate-geohash";
 
@@ -21,14 +23,6 @@ if (getApps().length === 0) {
   initializeApp(appOptions);
 }
 
-/**
- * Calculate distance between two coordinates in kilometers
- * @param {number} lat1 Latitude of point 1
- * @param {number} lng1 Longitude of point 1
- * @param {number} lat2 Latitude of point 2
- * @param {number} lng2 Longitude of point 2
- * @return {number} Distance in kilometers
- */
 function calculateDistance(
   lat1: number,
   lng1: number,
@@ -38,37 +32,6 @@ function calculateDistance(
   return distanceBetween([lat1, lng1], [lat2, lng2]);
 }
 
-/**
- * Check if two geohashes are nearby (within search radius)
- * Uses geohash prefix matching for quick proximity checks
- * @param {string} driverGeohash Driver's geohash
- * @param {string} rideGeohash Ride pickup geohash
- * @param {number} precision Geohash precision to compare
- * (higher = smaller area)
- * @return {boolean} True if geohashes match at given precision
- */
-function isNearbyGeohash(
-  driverGeohash: string,
-  rideGeohash: string,
-  precision: number = 4,
-): boolean {
-  return (
-    driverGeohash.substring(0, precision) ===
-    rideGeohash.substring(0, precision)
-  );
-}
-
-/**
- * Cloud Function triggered when a new active ride is created.
- * Finds the closest available driver and assigns them to the ride.
- *
- * Triggers on: /active_rides/{rideId} - onCreate
- *
- * @param snapshot - The database snapshot containing the new ride data
- * @param context - Firebase context with function metadata
- *
- * @returns Promise<void>
- */
 export const findAvailableDriverFunction = functions.database
   .ref("/active_rides/{rideId}")
   .onCreate(async (snapshot, context) => {
@@ -82,59 +45,24 @@ export const findAvailableDriverFunction = functions.database
         pickupGeohash: rideData.pickup.geohash,
       });
 
-      const db = getDatabase();
+      const db: Database = getDatabase();
       const pickupLat = rideData.pickup.location[0];
       const pickupLng = rideData.pickup.location[1];
       const rideGeohash = rideData.pickup.geohash;
 
-      // Fetch all active drivers
-      const driversSnapshot = await db.ref("drivers").get();
+      // Fetch all available drivers
+      const driversData = await fetchAvailableDrivers(db);
 
-      if (!driversSnapshot.exists()) {
+      if (!driversData) {
         logger.warn("No drivers available", { rideId });
         await db.ref(`active_rides/${rideId}`).update({
-          status: "no_drivers_available",
+          status: RideStatusEnum.SEARCHING,
         });
         return Promise.resolve();
       }
 
-      const driversData = driversSnapshot.val() as Record<string, DriverStatus>;
-
-      // Filter nearby drivers using geohash
-      const nearbyDrivers: Driver[] = [];
-
-      for (const driverId in driversData) {
-        // Use Object.prototype.hasOwnProperty.call() for safer checking
-        if (!Object.prototype.hasOwnProperty.call(driversData, driverId)) {
-          continue;
-        }
-
-        const driver = driversData[driverId];
-
-        // Skip if driver doesn't have required location fields
-        if (!driver.latitude || !driver.longitude) {
-          continue;
-        }
-
-        // Skip if driver is not available (has pending offer, offline, etc.)
-        if (driver.status !== DriverStatusEnum.AVAILABLE) {
-          continue;
-        }
-
-        // Use geohash from driver data, or calculate if not present
-        const driverGeohash =
-          driver.g || calculateGeohash(driver.latitude, driver.longitude, 4);
-
-        // Check if driver is nearby using geohash
-        if (isNearbyGeohash(driverGeohash, rideGeohash, 4)) {
-          nearbyDrivers.push({
-            driverId,
-            latitude: driver.latitude,
-            longitude: driver.longitude,
-            geohash: driverGeohash,
-          });
-        }
-      }
+      // Filter nearby drivers
+      const nearbyDrivers = filterNearbyDrivers(driversData, rideGeohash);
 
       logger.info("Nearby drivers found", {
         rideId,
@@ -144,38 +72,24 @@ export const findAvailableDriverFunction = functions.database
       if (nearbyDrivers.length === 0) {
         logger.warn("No nearby drivers available", { rideId });
         await db.ref(`active_rides/${rideId}`).update({
-          status: "searching_no_nearby_drivers",
+          status: RideStatusEnum.SEARCHING,
         });
         return Promise.resolve();
       }
 
-      // Calculate distance to each nearby driver and find closest
-      let closestDriver: Driver | null = null;
-      let minDistance = Infinity;
+      // Find closest driver
+      const closestResult = findClosestDriver(
+        nearbyDrivers,
+        pickupLat,
+        pickupLng,
+      );
 
-      for (const driver of nearbyDrivers) {
-        const distance = calculateDistance(
-          pickupLat,
-          pickupLng,
-          driver.latitude,
-          driver.longitude,
-        );
-
-        logger.info("Driver distance calculated", {
-          driverId: driver.driverId,
-          distance: distance.toFixed(2),
-        });
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestDriver = driver;
-        }
-      }
-
-      if (!closestDriver) {
+      if (!closestResult) {
         logger.warn("Failed to find closest driver", { rideId });
         return Promise.resolve();
       }
+
+      const { driver: closestDriver, distance: minDistance } = closestResult;
 
       logger.info("Closest driver found", {
         rideId,
@@ -183,69 +97,27 @@ export const findAvailableDriverFunction = functions.database
         distance: minDistance.toFixed(2),
       });
 
-      // Assign the closest driver to the ride
-      await db.ref(`active_rides/${rideId}`).update({
-        assignedDriver: closestDriver.driverId,
-        status: DriverStatusEnum.DRIVER_OFFER_PENDING,
-        distanceToPickup: parseFloat(minDistance.toFixed(2)),
-        assignedAt: new Date().toISOString(),
-      });
+      // Update ride and driver status
+      await updateRideAndDriverStatus(
+        db,
+        rideId,
+        closestDriver.driverId,
+        parseFloat(minDistance.toFixed(2)),
+      );
 
       logger.info("Driver successfully assigned to ride", {
         rideId,
         driverId: closestDriver.driverId,
       });
 
-      // Fetch the driver's FCM token to send notification
-      try {
-        const driverRef = db.ref(`drivers/${closestDriver.driverId}`);
-        const driverSnapshot = await driverRef.get();
-        const driverData = driverSnapshot.val() as DriverStatus;
-
-        if (driverData && driverData.fcmToken) {
-          const fcmToken = driverData.fcmToken;
-
-          // Compose notification message
-          const message: DriverNotification = {
-            notification: {
-              title: "New Ride Request",
-              body: `Pickup: ${rideData.pickup.address}`,
-            },
-            data: {
-              rideId,
-              driverId: closestDriver.driverId,
-              pickupAddress: rideData.pickup.address,
-              dropoffAddress: rideData.dropoff.address,
-              distanceToPickup: minDistance.toFixed(2),
-              pickupLat: pickupLat.toString(),
-              pickupLng: pickupLng.toString(),
-            },
-            token: fcmToken,
-          };
-
-          // Send the message
-          const messaging = getMessaging();
-          const messageId = await messaging.send(message);
-
-          logger.info("FCM notification sent to driver", {
-            rideId,
-            driverId: closestDriver.driverId,
-            messageId,
-          });
-        } else {
-          logger.warn("Driver FCM token not found", {
-            rideId,
-            driverId: closestDriver.driverId,
-          });
-        }
-      } catch (fcmError) {
-        logger.error("Error sending FCM notification", {
-          rideId,
-          driverId: closestDriver.driverId,
-          error:
-            fcmError instanceof Error ? fcmError.message : String(fcmError),
-        });
-      }
+      // Send FCM notification
+      await sendRideNotification(
+        db,
+        rideId,
+        closestDriver.driverId,
+        rideData,
+        minDistance,
+      );
 
       return Promise.resolve();
     } catch (error) {
@@ -255,3 +127,172 @@ export const findAvailableDriverFunction = functions.database
       return Promise.resolve();
     }
   });
+
+async function fetchAvailableDrivers(
+  db: Database,
+): Promise<Record<string, DriverStatus> | null> {
+  const driversSnapshot = await db.ref("drivers").get();
+  return driversSnapshot.val() as Record<string, DriverStatus>;
+}
+
+function filterNearbyDrivers(
+  driversData: Record<string, DriverStatus>,
+  rideGeohash: string,
+): Driver[] {
+  const nearbyDrivers: Driver[] = [];
+
+  for (const driverId in driversData) {
+    if (!Object.prototype.hasOwnProperty.call(driversData, driverId)) {
+      continue;
+    }
+
+    const driver = driversData[driverId];
+
+    // Skip if driver doesn't have required location fields
+    if (!driver.latitude || !driver.longitude) {
+      continue;
+    }
+
+    // Skip if driver is not available
+    if (driver.status !== DriverStatusEnum.AVAILABLE) {
+      continue;
+    }
+
+    // Use geohash from driver data, or calculate if not present
+    const driverGeohash =
+      driver.g || calculateGeohash(driver.latitude, driver.longitude, 4);
+
+    // Check if driver is nearby using geohash
+    if (isNearbyGeohash(driverGeohash, rideGeohash, 4)) {
+      nearbyDrivers.push({
+        driverId,
+        latitude: driver.latitude,
+        longitude: driver.longitude,
+        geohash: driverGeohash,
+      });
+    }
+  }
+
+  return nearbyDrivers;
+}
+
+function findClosestDriver(
+  nearbyDrivers: Driver[],
+  pickupLat: number,
+  pickupLng: number,
+): { driver: Driver; distance: number } | null {
+  let closestDriver: Driver | null = null;
+  let minDistance = Infinity;
+
+  for (const driver of nearbyDrivers) {
+    const distance = calculateDistance(
+      pickupLat,
+      pickupLng,
+      driver.latitude,
+      driver.longitude,
+    );
+
+    logger.info("Driver distance calculated", {
+      driverId: driver.driverId,
+      distance: distance.toFixed(2),
+    });
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestDriver = driver;
+    }
+  }
+
+  return closestDriver
+    ? { driver: closestDriver, distance: minDistance }
+    : null;
+}
+
+async function updateRideAndDriverStatus(
+  db: Database,
+  rideId: string,
+  driverId: string,
+  distanceToPickup: number,
+): Promise<void> {
+  // Update ride status
+  await db.ref(`active_rides/${rideId}`).update({
+    assignedDriver: driverId,
+    status: RideStatusEnum.DRIVER_OFFERED,
+    distanceToPickup,
+    assignedAt: new Date().toISOString(),
+  });
+
+  // Update driver status to indicate pending offer
+  await db.ref(`drivers/${driverId}`).update({
+    status: DriverStatusEnum.DRIVER_OFFER_PENDING,
+  });
+}
+
+async function sendRideNotification(
+  db: Database,
+  rideId: string,
+  driverId: string,
+  rideData: RideData,
+  distanceToPickup: number,
+): Promise<void> {
+  try {
+    const driverRef = db.ref(`drivers/${driverId}`);
+    const driverSnapshot = await driverRef.get();
+    const driverData = driverSnapshot.val() as DriverStatus;
+
+    if (!driverData || !driverData.fcmToken) {
+      logger.warn("Driver FCM token not found", {
+        rideId,
+        driverId,
+      });
+      return;
+    }
+
+    const fcmToken = driverData.fcmToken;
+
+    // Compose notification message
+    const message: DriverNotification = {
+      notification: {
+        title: "New Ride Request",
+        body: `Pickup: ${rideData.pickup.address}`,
+      },
+      data: {
+        rideId,
+        driverId,
+        pickupAddress: rideData.pickup.address,
+        dropoffAddress: rideData.dropoff.address,
+        distanceToPickup: distanceToPickup.toFixed(2),
+        pickupLat: rideData.pickup.location[0].toString(),
+        pickupLng: rideData.pickup.location[1].toString(),
+      },
+      token: fcmToken,
+    };
+
+    // Send the message
+    const messaging = getMessaging();
+    const messageId = await messaging.send(message);
+
+    logger.info("FCM notification sent to driver", {
+      rideId,
+      driverId,
+      messageId,
+    });
+  } catch (fcmError) {
+    logger.error("Error sending FCM notification", {
+      rideId,
+      driverId,
+      error: fcmError instanceof Error ? fcmError.message : String(fcmError),
+    });
+  }
+}
+
+function isNearbyGeohash(
+  driverGeohash: string,
+  rideGeohash: string,
+  precision: number = 4,
+): boolean {
+  return (
+    driverGeohash.substring(0, precision) ===
+    rideGeohash.substring(0, precision)
+  );
+}
