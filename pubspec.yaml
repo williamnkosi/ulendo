@@ -11,7 +11,7 @@ workspace:
   - packages/ulendo_models
 
 dev_dependencies:
-  melos: ^7.3.0
+  melos: ^8.9.0
 
 melos:
   scripts:
