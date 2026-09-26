@@ -5,7 +5,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:ulendo_models/models/location_data.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 /// Service to handle real-time location tracking and Firebase Realtime Database uploads with GeoFire
