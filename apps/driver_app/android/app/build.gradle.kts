@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "mw.ulendo.driver_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

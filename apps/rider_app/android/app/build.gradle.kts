@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "mw.ulendo.rider_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
