@@ -22,6 +22,7 @@
       "type": "dart",
       "request": "launch",
       "program": "apps/rider_app/lib/main.dart",
+      "args": ["-d", "iPhone 16e"],
       "console": "integrated"
     },
     {
@@ -29,6 +30,7 @@
       "type": "dart",
       "request": "launch",
       "program": "apps/driver_app/lib/main.dart",
+      "args": ["-d", "iPhone 16e"],
       "console": "integrated"
     }
   ]
