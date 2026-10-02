@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:driver_app/home/widgets/live_location_map.dart';
 import 'package:driver_app/location/location_tracking_toggle.dart';
-import 'package:driver_app/rides/ride_details_page.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
 /// A placeholder screen for the Home feature/tab.
@@ -43,44 +43,25 @@ class _DriverHomePageState extends State<DriverHomePage> {
             );
           }
         },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Driver Home'),
-              const SizedBox(height: 16),
-              BlocBuilder<PermissionsBloc, PermissionsState>(
-                builder: (context, state) {
-                  if (state is PermissionsLoading) {
-                    return const CircularProgressIndicator();
-                  }
-                  if (state is PermissionsDriverGranted) {
-                    return const Text('Permissions Granted ✓');
-                  }
-                  return const Text('Checking permissions...');
-                },
+        child: BlocBuilder<PermissionsBloc, PermissionsState>(
+          builder: (context, state) {
+            if (state is PermissionsDriverGranted) {
+              return const LiveLocationMap();
+            }
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Driver Home'),
+                  const SizedBox(height: 16),
+                  if (state is PermissionsLoading)
+                    const CircularProgressIndicator()
+                  else
+                    const Text('Checking permissions...'),
+                ],
               ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RideDetailsPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.directions_car),
-                label: const Text('View Ride Details'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

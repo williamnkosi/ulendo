@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:driver_app/services/location_service.dart';
+import 'package:ulendo_models/models/location_data.dart';
 
 part 'location_tracking_event.dart';
 part 'location_tracking_state.dart';
@@ -78,6 +79,11 @@ class LocationTrackingBloc
         ),
       );
     }
+  }
+
+  /// Get stream of location updates
+  Stream<LocationData> getLocationStream() {
+    return _locationService.listenToLocationUpdates();
   }
 
   @override
