@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:driver_app/location/location_tracking_toggle.dart';
+import 'package:driver_app/home/widgets/location_tracking_toggle.dart';
 import 'package:ulendo_core/auth/auth_bloc.dart';
 import 'package:ulendo_core/auth/auth_event.dart';
 

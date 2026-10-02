@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:driver_app/location/location_tracking_toggle.dart';
+import 'package:driver_app/home/widgets/location_tracking_toggle.dart';
 
 /// A placeholder screen for the Earnings feature/tab.
 class DriverEarningsPage extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driver_app/home/widgets/live_location_map.dart';
-import 'package:driver_app/location/location_tracking_toggle.dart';
+import 'package:driver_app/home/widgets/location_tracking_toggle.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
 /// A placeholder screen for the Home feature/tab.
