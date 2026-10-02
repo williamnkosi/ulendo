@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driver_app/location/location_tracking_toggle.dart';
+import 'package:driver_app/rides/ride_details_page.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
 /// A placeholder screen for the Home feature/tab.
@@ -58,6 +59,25 @@ class _DriverHomePageState extends State<DriverHomePage> {
                   }
                   return const Text('Checking permissions...');
                 },
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RideDetailsPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.directions_car),
+                label: const Text('View Ride Details'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
               ),
             ],
           ),
