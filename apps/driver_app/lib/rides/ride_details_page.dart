@@ -3,27 +3,23 @@ import 'package:ulendo_models/ulendo_models.dart';
 
 /// Display ride details for the driver
 class RideDetailsPage extends StatelessWidget {
-  final RideRequest? rideRequest;
+  final RideNotificationMessage? notification;
 
-  const RideDetailsPage({super.key, this.rideRequest});
-
-  /// Dummy ride data for testing
-  static final _dummyRide = RideRequest(
-    pickup: Location(
-      lat: -1.2763,
-      lng: 36.7965,
-      address: '123 Nairobi Street, Westlands, Nairobi',
-    ),
-    dropoff: Location(
-      lat: -1.3521,
-      lng: 36.7784,
-      address: '456 Karen Road, Karen, Nairobi',
-    ),
-  );
+  const RideDetailsPage({super.key, this.notification});
 
   @override
   Widget build(BuildContext context) {
-    final ride = rideRequest ?? _dummyRide;
+    // Use notification data if available, otherwise show placeholder
+    if (notification == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Ride Details')),
+        body: const Center(
+          child: Text('No ride notification available'),
+        ),
+      );
+    }
+
+    final notif = notification!;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ride Details')),
@@ -73,9 +69,9 @@ class RideDetailsPage extends StatelessWidget {
                                   color: Colors.green,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const Text(
-                                  'Available',
-                                  style: TextStyle(
+                                child: Text(
+                                  notif.status ?? 'Available',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -95,7 +91,7 @@ class RideDetailsPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '#RD-${DateTime.now().millisecondsSinceEpoch % 10000}',
+                                '#${notif.rideId?.substring(0, 8) ?? 'N/A'}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -147,7 +143,7 @@ class RideDetailsPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  ride.pickup.address,
+                                  notif.pickupAddress ?? 'Unknown location',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -157,7 +153,7 @@ class RideDetailsPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Lat: ${ride.pickup.lat.toStringAsFixed(4)}, Lng: ${ride.pickup.lng.toStringAsFixed(4)}',
+                                  'Lat: ${notif.pickupLat?.toStringAsFixed(4) ?? 'N/A'}, Lng: ${notif.pickupLng?.toStringAsFixed(4) ?? 'N/A'}',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey,
@@ -210,7 +206,7 @@ class RideDetailsPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  ride.dropoff.address,
+                                  notif.dropoffAddress ?? 'Not specified',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -220,7 +216,7 @@ class RideDetailsPage extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Lat: ${ride.dropoff.lat.toStringAsFixed(4)}, Lng: ${ride.dropoff.lng.toStringAsFixed(4)}',
+                                  'Distance: ${notif.distanceToPickup?.toStringAsFixed(2) ?? 'N/A'} km',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey,

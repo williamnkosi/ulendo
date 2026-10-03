@@ -7,6 +7,7 @@ import 'package:driver_app/earnings/earnings_page.dart';
 import 'package:driver_app/home/home_page.dart';
 import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
 import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
+import 'package:driver_app/rides/ride_details_page.dart';
 import 'package:driver_app/services/location_service.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 import 'package:ulendo_core/messaging/fcm_service.dart';
@@ -91,22 +92,36 @@ class _DriverShellState extends State<DriverShell> {
           },
         ),
       ],
-      child: Scaffold(
-        body: _generatePage(),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (value) => setState(() => _selectedIndex = value),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.attach_money),
-              label: 'Earnings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Account',
-            ),
-          ],
+      child: BlocListener<RideManagementBloc, RideManagementState>(
+        listener: (context, state) {
+          if (state is RideOffered) {
+            _logger.i('RideOffered state detected, navigating to ride details');
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => RideDetailsPage(
+                  notification: state.notification,
+                ),
+              ),
+            );
+          }
+        },
+        child: Scaffold(
+          body: _generatePage(),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: (value) => setState(() => _selectedIndex = value),
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.attach_money),
+                label: 'Earnings',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.account_circle),
+                label: 'Account',
+              ),
+            ],
+          ),
         ),
       ),
     );
