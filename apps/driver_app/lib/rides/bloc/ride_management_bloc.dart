@@ -306,32 +306,32 @@ class RideManagementBloc
         ),
       );
 
-      // Fetch polylines from pickup to dropoff
+      // Fetch polylines from DRIVER'S CURRENT LOCATION to PICKUP
       Set<Polyline>? polylines;
+      final driverLat = _currentLocation?.latitude ?? 0.0;
+      final driverLng = _currentLocation?.longitude ?? 0.0;
       final pickupLat = _currentRide!.pickup.lat;
       final pickupLng = _currentRide!.pickup.lng;
-      final dropoffLat = _currentRide!.dropoff.lat;
-      final dropoffLng = _currentRide!.dropoff.lng;
 
       _logger.i(
-        'Fetching polylines from ($pickupLat, $pickupLng) to ($dropoffLat, $dropoffLng)',
+        'Fetching polylines from driver (${driverLat}, ${driverLng}) to pickup ($pickupLat, $pickupLng)',
       );
 
-      if (pickupLat == 0.0 ||
-          pickupLng == 0.0 ||
-          dropoffLat == 0.0 ||
-          dropoffLng == 0.0) {
+      if (driverLat == 0.0 ||
+          driverLng == 0.0 ||
+          pickupLat == 0.0 ||
+          pickupLng == 0.0) {
         _logger.e(
-          'INVALID COORDINATES: Pickup($pickupLat, $pickupLng) Dropoff($dropoffLat, $dropoffLng)',
+          'INVALID COORDINATES: Driver($driverLat, $driverLng) Pickup($pickupLat, $pickupLng)',
         );
       }
 
       try {
         polylines = await _polylineService.getPolylines(
-          pickupLat: pickupLat,
-          pickupLng: pickupLng,
-          dropoffLat: dropoffLat,
-          dropoffLng: dropoffLng,
+          pickupLat: driverLat,
+          pickupLng: driverLng,
+          dropoffLat: pickupLat,
+          dropoffLng: pickupLng,
         );
         _logger.i(
           'Polylines fetched successfully: ${polylines.length} polylines',
