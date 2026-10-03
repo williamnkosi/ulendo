@@ -114,10 +114,7 @@ class _RouteMapState extends State<RouteMap> {
                 children: [
                   const Text(
                     'En Route to Pickup',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -177,8 +174,8 @@ class _RouteMapState extends State<RouteMap> {
                           ? () {
                               _logger.i('Driver arrived at pickup');
                               context.read<RideManagementBloc>().add(
-                                    const ArrivedAtPickupEvent(),
-                                  );
+                                const ArrivedAtPickupEvent(),
+                              );
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -195,7 +192,9 @@ class _RouteMapState extends State<RouteMap> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: isAtPickup ? Colors.white : Colors.grey.shade600,
+                          color: isAtPickup
+                              ? Colors.white
+                              : Colors.grey.shade600,
                         ),
                       ),
                     ),
