@@ -5,10 +5,7 @@ import 'package:ulendo_models/ulendo_models.dart';
 class RideDetailsPage extends StatelessWidget {
   final RideRequest? rideRequest;
 
-  const RideDetailsPage({
-    super.key,
-    this.rideRequest,
-  });
+  const RideDetailsPage({super.key, this.rideRequest});
 
   /// Dummy ride data for testing
   static final _dummyRide = RideRequest(
@@ -29,9 +26,7 @@ class RideDetailsPage extends StatelessWidget {
     final ride = rideRequest ?? _dummyRide;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ride Details'),
-      ),
+      appBar: AppBar(title: const Text('Ride Details')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -256,10 +251,7 @@ class RideDetailsPage extends StatelessWidget {
                           const SizedBox(height: 8),
                           const Text(
                             'Distance',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                           const SizedBox(height: 4),
                           const Text(
@@ -277,10 +269,7 @@ class RideDetailsPage extends StatelessWidget {
                           const SizedBox(height: 8),
                           const Text(
                             'Est. Time',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                           const SizedBox(height: 4),
                           const Text(
@@ -298,10 +287,7 @@ class RideDetailsPage extends StatelessWidget {
                           const SizedBox(height: 8),
                           const Text(
                             'Fare',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                           const SizedBox(height: 4),
                           const Text(
@@ -351,10 +337,7 @@ class RideDetailsPage extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
                     'Decline Ride',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
