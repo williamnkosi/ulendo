@@ -23,21 +23,32 @@ class RideDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _logger.i('RideDetailsPage.build() called');
-    return BlocBuilder<RideManagementBloc, RideManagementState>(
-      builder: (context, state) {
-        _logger.d('RideDetailsPage BlocBuilder - state: $state');
-        _logger.d('Is RideOffered: ${state is RideOffered}');
-
-        // Only render the page if in RideOffered state
-        if (state is! RideOffered) {
-          _logger.w('State is NOT RideOffered, showing empty state');
-          return Scaffold(
-            appBar: AppBar(title: const Text('Ride Details')),
-            body: const Center(child: Text('No ride notification available')),
-          );
+    return BlocListener<RideManagementBloc, RideManagementState>(
+      listenWhen: (previous, current) {
+        final shouldPop = previous is RideOffered && current is! RideOffered;
+        if (shouldPop) {
+          _logger.i('State changed from RideOffered to ${current.runtimeType}, popping page');
         }
+        return shouldPop;
+      },
+      listener: (context, state) {
+        Navigator.of(context).pop();
+      },
+      child: BlocBuilder<RideManagementBloc, RideManagementState>(
+        builder: (context, state) {
+          _logger.d('RideDetailsPage BlocBuilder - state: $state');
+          _logger.d('Is RideOffered: ${state is RideOffered}');
 
-        _logger.i('State IS RideOffered, showing ride details');
+          // Only render the page if in RideOffered state
+          if (state is! RideOffered) {
+            _logger.w('State is NOT RideOffered, showing empty state');
+            return Scaffold(
+              appBar: AppBar(title: const Text('Ride Details')),
+              body: const Center(child: Text('No ride notification available')),
+            );
+          }
+
+          _logger.i('State IS RideOffered, showing ride details');
         final notif = state.notification;
 
         return Scaffold(
@@ -337,8 +348,9 @@ class RideDetailsPage extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Ride Accepted!')),
+                        _logger.i('Accept Ride button pressed');
+                        context.read<RideManagementBloc>().add(
+                          const AcceptRideEvent(),
                         );
                       },
                       child: const Text(
@@ -373,7 +385,8 @@ class RideDetailsPage extends StatelessWidget {
             ),
           ),
         );
-      },
+        },
+      ),
     );
   }
 }
