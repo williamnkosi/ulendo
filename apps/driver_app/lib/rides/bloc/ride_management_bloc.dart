@@ -9,7 +9,8 @@ part 'ride_management_state.dart';
 
 /// BLoC for managing the entire ride share experience
 /// Handles driver state transitions from offline → online → ride offered → pickup → en route → completion
-class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> {
+class RideManagementBloc
+    extends Bloc<RideManagementEvent, RideManagementState> {
   final LocationService _locationService;
 
   // Store ride and location data
@@ -18,8 +19,8 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
   LocationData? _currentLocation;
 
   RideManagementBloc({required LocationService locationService})
-      : _locationService = locationService,
-        super(const Offline()) {
+    : _locationService = locationService,
+      super(const Offline()) {
     on<GoOnlineEvent>(_onGoOnline);
     on<GoOfflineEvent>(_onGoOffline);
     on<RideOfferReceivedEvent>(_onRideOfferReceived);
@@ -77,17 +78,19 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
       _currentRide = event.rideRequest;
       _currentRideId = event.rideId;
 
-      emit(RideOffered(
-        rideRequest: event.rideRequest,
-        currentLocation: _currentLocation ?? const LocationData(
-          driverId: '',
-          latitude: 0,
-          longitude: 0,
+      emit(
+        RideOffered(
+          rideRequest: event.rideRequest,
+          currentLocation:
+              _currentLocation ??
+              const LocationData(driverId: '', latitude: 0, longitude: 0),
+          rideId: event.rideId,
         ),
-        rideId: event.rideId,
-      ));
+      );
     } catch (e) {
-      emit(RideManagementError('Failed to receive ride offer: ${e.toString()}'));
+      emit(
+        RideManagementError('Failed to receive ride offer: ${e.toString()}'),
+      );
     }
   }
 
@@ -102,15 +105,15 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
         return;
       }
 
-      emit(EnRouteToPickup(
-        rideRequest: _currentRide!,
-        currentLocation: _currentLocation ?? const LocationData(
-          driverId: '',
-          latitude: 0,
-          longitude: 0,
+      emit(
+        EnRouteToPickup(
+          rideRequest: _currentRide!,
+          currentLocation:
+              _currentLocation ??
+              const LocationData(driverId: '', latitude: 0, longitude: 0),
+          rideId: _currentRideId!,
         ),
-        rideId: _currentRideId!,
-      ));
+      );
     } catch (e) {
       emit(RideManagementError('Failed to accept ride: ${e.toString()}'));
     }
@@ -127,15 +130,15 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
         return;
       }
 
-      emit(Waiting(
-        rideRequest: _currentRide!,
-        currentLocation: _currentLocation ?? const LocationData(
-          driverId: '',
-          latitude: 0,
-          longitude: 0,
+      emit(
+        Waiting(
+          rideRequest: _currentRide!,
+          currentLocation:
+              _currentLocation ??
+              const LocationData(driverId: '', latitude: 0, longitude: 0),
+          rideId: _currentRideId!,
         ),
-        rideId: _currentRideId!,
-      ));
+      );
     } catch (e) {
       emit(RideManagementError('Failed to arrive at pickup: ${e.toString()}'));
     }
@@ -152,15 +155,15 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
         return;
       }
 
-      emit(EnRouteToDestination(
-        rideRequest: _currentRide!,
-        currentLocation: _currentLocation ?? const LocationData(
-          driverId: '',
-          latitude: 0,
-          longitude: 0,
+      emit(
+        EnRouteToDestination(
+          rideRequest: _currentRide!,
+          currentLocation:
+              _currentLocation ??
+              const LocationData(driverId: '', latitude: 0, longitude: 0),
+          rideId: _currentRideId!,
         ),
-        rideId: _currentRideId!,
-      ));
+      );
     } catch (e) {
       emit(RideManagementError('Failed to pick up passenger: ${e.toString()}'));
     }
@@ -179,17 +182,19 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
 
       // Stay in EnRouteToDestination until ride is completed
       // This allows driver to adjust if needed
-      emit(EnRouteToDestination(
-        rideRequest: _currentRide!,
-        currentLocation: _currentLocation ?? const LocationData(
-          driverId: '',
-          latitude: 0,
-          longitude: 0,
+      emit(
+        EnRouteToDestination(
+          rideRequest: _currentRide!,
+          currentLocation:
+              _currentLocation ??
+              const LocationData(driverId: '', latitude: 0, longitude: 0),
+          rideId: _currentRideId!,
         ),
-        rideId: _currentRideId!,
-      ));
+      );
     } catch (e) {
-      emit(RideManagementError('Failed to arrive at destination: ${e.toString()}'));
+      emit(
+        RideManagementError('Failed to arrive at destination: ${e.toString()}'),
+      );
     }
   }
 
@@ -211,11 +216,13 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
       _currentRide = null;
       _currentRideId = null;
 
-      emit(RideCompleted(
-        rideRequest: completedRide,
-        currentLocation: _currentLocation,
-        rideId: completedRideId,
-      ));
+      emit(
+        RideCompleted(
+          rideRequest: completedRide,
+          currentLocation: _currentLocation,
+          rideId: completedRideId,
+        ),
+      );
 
       // Transition back to online after completion
       emit(Online(currentLocation: _currentLocation));
@@ -236,41 +243,51 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
       emit(Online(currentLocation: event.currentLocation));
     } else if (state is RideOffered) {
       final s = state as RideOffered;
-      emit(RideOffered(
-        rideRequest: s.rideRequest,
-        currentLocation: event.currentLocation,
-        rideId: s.rideId,
-      ));
+      emit(
+        RideOffered(
+          rideRequest: s.rideRequest,
+          currentLocation: event.currentLocation,
+          rideId: s.rideId,
+        ),
+      );
     } else if (state is EnRouteToPickup) {
       final s = state as EnRouteToPickup;
-      emit(EnRouteToPickup(
-        rideRequest: s.rideRequest,
-        currentLocation: event.currentLocation,
-        rideId: s.rideId,
-        estimatedTimeToPickup: s.estimatedTimeToPickup,
-      ));
+      emit(
+        EnRouteToPickup(
+          rideRequest: s.rideRequest,
+          currentLocation: event.currentLocation,
+          rideId: s.rideId,
+          estimatedTimeToPickup: s.estimatedTimeToPickup,
+        ),
+      );
     } else if (state is Waiting) {
       final s = state as Waiting;
-      emit(Waiting(
-        rideRequest: s.rideRequest,
-        currentLocation: event.currentLocation,
-        rideId: s.rideId,
-      ));
+      emit(
+        Waiting(
+          rideRequest: s.rideRequest,
+          currentLocation: event.currentLocation,
+          rideId: s.rideId,
+        ),
+      );
     } else if (state is EnRouteToDestination) {
       final s = state as EnRouteToDestination;
-      emit(EnRouteToDestination(
-        rideRequest: s.rideRequest,
-        currentLocation: event.currentLocation,
-        rideId: s.rideId,
-        estimatedTimeToDestination: s.estimatedTimeToDestination,
-      ));
+      emit(
+        EnRouteToDestination(
+          rideRequest: s.rideRequest,
+          currentLocation: event.currentLocation,
+          rideId: s.rideId,
+          estimatedTimeToDestination: s.estimatedTimeToDestination,
+        ),
+      );
     } else if (state is RideCompleted) {
       final s = state as RideCompleted;
-      emit(RideCompleted(
-        rideRequest: s.rideRequest,
-        currentLocation: event.currentLocation,
-        rideId: s.rideId,
-      ));
+      emit(
+        RideCompleted(
+          rideRequest: s.rideRequest,
+          currentLocation: event.currentLocation,
+          rideId: s.rideId,
+        ),
+      );
     }
   }
 
@@ -281,20 +298,24 @@ class RideManagementBloc extends Bloc<RideManagementEvent, RideManagementState> 
   ) async {
     if (state is EnRouteToPickup) {
       final s = state as EnRouteToPickup;
-      emit(EnRouteToPickup(
-        rideRequest: s.rideRequest,
-        currentLocation: s.currentLocation,
-        rideId: s.rideId,
-        estimatedTimeToPickup: event.estimatedTime,
-      ));
+      emit(
+        EnRouteToPickup(
+          rideRequest: s.rideRequest,
+          currentLocation: s.currentLocation,
+          rideId: s.rideId,
+          estimatedTimeToPickup: event.estimatedTime,
+        ),
+      );
     } else if (state is EnRouteToDestination) {
       final s = state as EnRouteToDestination;
-      emit(EnRouteToDestination(
-        rideRequest: s.rideRequest,
-        currentLocation: s.currentLocation,
-        rideId: s.rideId,
-        estimatedTimeToDestination: event.estimatedTime,
-      ));
+      emit(
+        EnRouteToDestination(
+          rideRequest: s.rideRequest,
+          currentLocation: s.currentLocation,
+          rideId: s.rideId,
+          estimatedTimeToDestination: event.estimatedTime,
+        ),
+      );
     }
   }
 

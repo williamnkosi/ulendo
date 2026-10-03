@@ -4,6 +4,7 @@ import 'package:driver_app/account/account_page.dart';
 import 'package:driver_app/earnings/earnings_page.dart';
 import 'package:driver_app/home/home_page.dart';
 import 'package:driver_app/location/location_tracking_bloc.dart';
+import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
 import 'package:driver_app/services/location_service.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 
@@ -41,6 +42,10 @@ class _DriverShellState extends State<DriverShell> {
         BlocProvider<LocationTrackingBloc>(
           create: (context) =>
               LocationTrackingBloc(locationService: LocationService()),
+        ),
+        BlocProvider<RideManagementBloc>(
+          create: (context) =>
+              RideManagementBloc(locationService: LocationService()),
         ),
       ],
       child: Scaffold(

@@ -55,11 +55,11 @@ class EnRouteToPickup extends RideManagementState {
 
   @override
   List<Object?> get props => [
-        rideRequest,
-        currentLocation,
-        rideId,
-        estimatedTimeToPickup,
-      ];
+    rideRequest,
+    currentLocation,
+    rideId,
+    estimatedTimeToPickup,
+  ];
 }
 
 /// Driver has arrived at pickup location and is waiting for passenger
@@ -94,11 +94,11 @@ class EnRouteToDestination extends RideManagementState {
 
   @override
   List<Object?> get props => [
-        rideRequest,
-        currentLocation,
-        rideId,
-        estimatedTimeToDestination,
-      ];
+    rideRequest,
+    currentLocation,
+    rideId,
+    estimatedTimeToDestination,
+  ];
 }
 
 /// Ride has been completed
