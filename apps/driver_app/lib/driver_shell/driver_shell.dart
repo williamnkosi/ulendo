@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:driver_app/account/account_page.dart';
 import 'package:driver_app/earnings/earnings_page.dart';
 import 'package:driver_app/home/home_page.dart';
+import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
 import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
 import 'package:driver_app/services/location_service.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
+import 'package:ulendo_core/messaging/fcm_service.dart';
 
 /// The root navigation shell that provides bottom tab navigation.
 class DriverShell extends StatefulWidget {
@@ -37,6 +40,13 @@ class _DriverShellState extends State<DriverShell> {
         BlocProvider<PermissionsBloc>(
           create: (context) =>
               PermissionsBloc()..add(const RequestDriverPermissionsEvent()),
+        ),
+        BlocProvider<NotificationHubBloc>(
+          create: (context) {
+            final userId = FirebaseAuth.instance.currentUser?.uid;
+            return NotificationHubBloc(fcmService: FCMService())
+              ..add(InitializeNotificationHubEvent(driverId: userId ?? ''));
+          },
         ),
         BlocProvider<RideManagementBloc>(
           create: (context) =>

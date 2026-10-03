@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,6 +13,8 @@ class FCMService {
 
   late String _driverId;
   late DatabaseReference _driverRef;
+  StreamSubscription<RemoteMessage>? _foregroundSubscription;
+  StreamSubscription<RemoteMessage>? _messageOpenedSubscription;
 
   /// Initialize FCM Service with driver ID
   Future<void> initialize(String driverId) async {
@@ -90,10 +93,10 @@ class FCMService {
 
   /// Setup foreground message handler
   /// Called when notification is received while app is open
-  void setupForegroundMessageHandler(
-    Future<void> Function(RemoteMessage) handler,
-  ) {
-    FirebaseMessaging.onMessage.listen(handler);
+  Future<void> setupForegroundMessageHandler(
+    void Function(RemoteMessage) handler,
+  ) async {
+    _foregroundSubscription = FirebaseMessaging.onMessage.listen(handler);
   }
 
   /// Setup background message handler
@@ -106,13 +109,19 @@ class FCMService {
 
   /// Setup message opened handler
   /// Called when user taps on notification (app closed or background)
-  void setupMessageOpenedHandler(void Function(RemoteMessage) handler) {
-    FirebaseMessaging.onMessageOpenedApp.listen(handler);
+  Future<void> setupMessageOpenedHandler(
+    void Function(RemoteMessage) handler,
+  ) async {
+    _messageOpenedSubscription = FirebaseMessaging.onMessageOpenedApp.listen(
+      handler,
+    );
   }
 
   /// Delete FCM token (cleanup when driver logs out)
   Future<void> deleteFCMToken() async {
     try {
+      await _foregroundSubscription?.cancel();
+      await _messageOpenedSubscription?.cancel();
       await _driverRef.update({'fcmToken': null});
       await _firebaseMessaging.deleteToken();
       print('FCM token deleted');
