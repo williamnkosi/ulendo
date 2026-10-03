@@ -192,6 +192,9 @@ class RideManagementBloc
       final pickupData = rideData['pickup'] as Map<dynamic, dynamic>?;
       final dropoffData = rideData['dropoff'] as Map<dynamic, dynamic>?;
 
+      _logger.d('Pickup data from database: $pickupData');
+      _logger.d('Dropoff data from database: $dropoffData');
+
       if (pickupData == null || dropoffData == null) {
         _logger.e('Pickup or dropoff data missing in ride record');
         emit(
@@ -206,6 +209,9 @@ class RideManagementBloc
       final pickupLocation = pickupData['location'] as List<dynamic>;
       final dropoffLocation = dropoffData['location'] as List<dynamic>;
 
+      _logger.d('Pickup location array: $pickupLocation');
+      _logger.d('Dropoff location array: $dropoffLocation');
+
       final pickupLat = (pickupLocation[0] as num).toDouble();
       final pickupLng = (pickupLocation[1] as num).toDouble();
       final pickupAddress = (pickupData['address'] as String?) ?? '';
@@ -215,7 +221,7 @@ class RideManagementBloc
       final dropoffAddress = (dropoffData['address'] as String?) ?? '';
 
       _logger.i(
-        'Extracted ride coordinates - Pickup: ($pickupLat, $pickupLng), Dropoff: ($dropoffLat, $dropoffLng)',
+        'Extracted coordinates - Pickup: ($pickupLat, $pickupLng, "$pickupAddress"), Dropoff: ($dropoffLat, $dropoffLng, "$dropoffAddress")',
       );
 
       // Create RideRequest with database coordinates
@@ -267,11 +273,14 @@ class RideManagementBloc
   ) async {
     try {
       if (_currentRide == null || _currentRideId == null) {
+        _logger.e('Cannot accept ride: _currentRide is ${_currentRide == null ? 'NULL' : 'SET'}, _currentRideId is ${_currentRideId == null ? 'NULL' : 'SET'}');
         emit(const RideManagementError('No ride to accept'));
         return;
       }
 
       _logger.i('Driver accepted ride: $_currentRideId');
+      _logger.d('_currentRide pickup: ${_currentRide!.pickup}');
+      _logger.d('_currentRide dropoff: ${_currentRide!.dropoff}');
 
       // Emit loading state while processing
       emit(
@@ -285,6 +294,8 @@ class RideManagementBloc
                 dropoffAddress: _currentRide!.dropoff.address,
                 pickupLat: _currentRide!.pickup.lat,
                 pickupLng: _currentRide!.pickup.lng,
+                dropoffLat: _currentRide!.dropoff.lat,
+                dropoffLng: _currentRide!.dropoff.lng,
                 status: 'driver_accepted',
               ),
           currentLocation:
@@ -295,24 +306,34 @@ class RideManagementBloc
 
       // Fetch polylines from pickup to dropoff
       Set<Polyline>? polylines;
+      final pickupLat = _currentRide!.pickup.lat;
+      final pickupLng = _currentRide!.pickup.lng;
+      final dropoffLat = _currentRide!.dropoff.lat;
+      final dropoffLng = _currentRide!.dropoff.lng;
+
       _logger.i(
-        'Fetching polylines from (${_currentRide!.pickup.lat}, ${_currentRide!.pickup.lng}) to (${_currentRide!.dropoff.lat}, ${_currentRide!.dropoff.lng})',
+        'Fetching polylines from ($pickupLat, $pickupLng) to ($dropoffLat, $dropoffLng)',
       );
+
+      if (pickupLat == 0.0 || pickupLng == 0.0 || dropoffLat == 0.0 || dropoffLng == 0.0) {
+        _logger.e('INVALID COORDINATES: Pickup($pickupLat, $pickupLng) Dropoff($dropoffLat, $dropoffLng)');
+      }
 
       try {
         polylines = await _polylineService.getPolylines(
-          pickupLat: _currentRide!.pickup.lat,
-          pickupLng: _currentRide!.pickup.lng,
-          dropoffLat: _currentRide!.dropoff.lat,
-          dropoffLng: _currentRide!.dropoff.lng,
+          pickupLat: pickupLat,
+          pickupLng: pickupLng,
+          dropoffLat: dropoffLat,
+          dropoffLng: dropoffLng,
         );
-        _logger.i('Polylines fetched successfully');
+        _logger.i('Polylines fetched successfully: ${polylines.length} polylines');
       } catch (polylineError) {
-        _logger.w('Failed to fetch polylines: $polylineError');
+        _logger.e('Failed to fetch polylines: $polylineError');
         // Continue even if polylines fail - non-critical feature
       }
 
       // Transition to EnRouteToPickup with polylines
+      _logger.i('Emitting EnRouteToPickup state with ${polylines?.length ?? 0} polylines');
       emit(
         EnRouteToPickup(
           rideRequest: _currentRide!,
@@ -324,6 +345,7 @@ class RideManagementBloc
         ),
       );
     } catch (e) {
+      _logger.e('Exception in _onAcceptRide: $e');
       emit(RideManagementError('Failed to accept ride: ${e.toString()}'));
     }
   }
@@ -466,6 +488,7 @@ class RideManagementBloc
           currentLocation: event.currentLocation,
           rideId: s.rideId,
           estimatedTimeToPickup: s.estimatedTimeToPickup,
+          polylines: s.polylines,
         ),
       );
     } else if (state is Waiting) {
@@ -512,6 +535,7 @@ class RideManagementBloc
           currentLocation: s.currentLocation,
           rideId: s.rideId,
           estimatedTimeToPickup: event.estimatedTime,
+          polylines: s.polylines,
         ),
       );
     } else if (state is EnRouteToDestination) {

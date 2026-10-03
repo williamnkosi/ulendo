@@ -79,6 +79,12 @@ class PolylineService {
           geodesic: true,
         );
 
+        _logger.i('Created Polyline object with ${decodedPoints.length} points');
+        _logger.d('Polyline ID: $polylineId');
+        _logger.d('Polyline color: $polylineColor');
+        _logger.d('First point: ${decodedPoints.isNotEmpty ? decodedPoints.first : 'N/A'}');
+        _logger.d('Last point: ${decodedPoints.isNotEmpty ? decodedPoints.last : 'N/A'}');
+
         return {polyline};
       } else {
         _logger.e(

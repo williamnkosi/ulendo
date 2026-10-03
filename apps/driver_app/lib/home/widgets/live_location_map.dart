@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -22,12 +23,22 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
   Set<Polyline> _polylines = {};
   CameraPosition? _currentCameraPosition;
 
+  final Logger _logger = Logger(
+    printer: PrefixPrinter(
+      PrettyPrinter(methodCount: 0),
+      info: '[LiveLocationMap]',
+      error: '[LiveLocationMap]',
+      warning: '[LiveLocationMap]',
+      debug: '[LiveLocationMap]',
+    ),
+  );
+
   @override
   void initState() {
     super.initState();
     // Initialize with current state if it has location
     final bloc = context.read<RideManagementBloc>();
-    print('LiveLocationMap initState - Current bloc state: ${bloc.state}');
+    _logger.i('Initializing LiveLocationMap - Current bloc state: ${bloc.state.runtimeType}');
     _updateMapForState(bloc.state);
   }
 
@@ -35,7 +46,11 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
   Widget build(BuildContext context) {
     return BlocListener<RideManagementBloc, RideManagementState>(
       listener: (context, state) {
-        print('LiveLocationMap BlocListener - State: ${state.runtimeType}');
+        _logger.d('State changed: ${state.runtimeType}');
+        _logger.d('Is EnRouteToPickup: ${state is EnRouteToPickup}');
+        if (state is EnRouteToPickup) {
+          _logger.i('EnRouteToPickup state detected - polylines: ${state.polylines?.length ?? 0}');
+        }
         _updateMapForState(state);
       },
       child: Scaffold(
@@ -67,21 +82,28 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
 
   void _updateMapForState(RideManagementState state) {
     final location = _getCurrentLocationFromState(state);
-    print(
-      '_updateMapForState - State: ${state.runtimeType}, Location: $location',
-    );
+    _logger.d('Updating map for state: ${state.runtimeType}, Location: $location');
 
     // Handle polylines for EnRouteToPickup state
-    if (state is EnRouteToPickup && state.polylines != null) {
-      print(
-        'EnRouteToPickup state - Found ${state.polylines!.length} polylines',
-      );
-      setState(() {
-        _polylines = state.polylines!;
-      });
+    if (state is EnRouteToPickup) {
+      _logger.d('State IS EnRouteToPickup');
+      _logger.d('state.polylines != null: ${state.polylines != null}');
+      _logger.d('state.polylines length: ${state.polylines?.length ?? 'NULL'}');
+      
+      if (state.polylines != null) {
+        _logger.i('EnRouteToPickup state - Rendering ${state.polylines!.length} polylines');
+        setState(() {
+          _polylines = state.polylines!;
+          _logger.i('Polylines set in state: $_polylines');
+        });
+      } else {
+        _logger.w('EnRouteToPickup state but polylines is NULL');
+      }
     } else {
+      _logger.d('State is NOT EnRouteToPickup, current type: ${state.runtimeType}');
       // Clear polylines for other states
       if (_polylines.isNotEmpty) {
+        _logger.d('Clearing polylines for state: ${state.runtimeType}');
         setState(() {
           _polylines = {};
         });
@@ -89,7 +111,7 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
     }
 
     if (location != null) {
-      print('Location update: ${location.latitude}, ${location.longitude}');
+      _logger.i('Updating marker location: (${location.latitude}, ${location.longitude})');
 
       final newMarker = Marker(
         markerId: const MarkerId('driver_location'),
@@ -112,12 +134,13 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
       // Animate camera to new position
       _controller.future
           .then((controller) {
+            _logger.d('Animating camera to new position: (${location.latitude}, ${location.longitude})');
             controller.animateCamera(
               CameraUpdate.newCameraPosition(_currentCameraPosition!),
             );
           })
           .catchError((error) {
-            print('Error animating camera: $error');
+            _logger.e('Error animating camera: $error');
           });
     }
   }
