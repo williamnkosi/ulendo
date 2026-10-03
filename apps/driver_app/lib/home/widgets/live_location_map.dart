@@ -19,7 +19,7 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
       Completer<GoogleMapController>();
 
   late final RideManagementBloc _rideBloc;
-  
+
   Set<Marker> _markers = {};
   CameraPosition? _currentCameraPosition;
 
@@ -57,9 +57,7 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
             title: 'Driver Location',
             snippet: 'Current position',
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue,
-          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         );
 
         setState(() {

@@ -20,36 +20,24 @@ class LocationTrackingToggle extends StatelessWidget {
       child: BlocBuilder<RideManagementBloc, RideManagementState>(
         builder: (context, state) {
           final isOnline = state is! Offline;
-          final isLoading = false;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Center(
               child: GestureDetector(
-                onTap: isLoading
-                    ? null
-                    : () {
-                        print(
-                          'Toggle tapped. Current state: $state, isOnline: $isOnline',
-                        );
-                        if (isOnline) {
-                          print('Going offline');
-                          context.read<RideManagementBloc>().add(
-                            const GoOfflineEvent(),
-                          );
-                        } else {
-                          print('Going online');
-                          context.read<RideManagementBloc>().add(
-                            const GoOnlineEvent(),
-                          );
-                        }
-                      },
+                onTap: () {
+                  if (isOnline) {
+                    context.read<RideManagementBloc>().add(
+                      const GoOfflineEvent(),
+                    );
+                  } else {
+                    context.read<RideManagementBloc>().add(
+                      const GoOnlineEvent(),
+                    );
+                  }
+                },
                 child: Tooltip(
-                  message: isLoading
-                      ? 'Loading...'
-                      : isOnline
-                      ? 'Go offline'
-                      : 'Go online',
+                  message: isOnline ? 'Go offline' : 'Go online',
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12.0,
@@ -57,52 +45,29 @@ class LocationTrackingToggle extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
-                      color: isLoading
-                          ? Colors.orange.withOpacity(0.15)
-                          : isOnline
+                      color: isOnline
                           ? Colors.green.withOpacity(0.15)
                           : Colors.grey.withOpacity(0.15),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        isLoading
-                            ? SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    isStreaming ? Colors.red : Colors.grey,
-                                  ),
-                                ),
-                              )
-                            : Icon(
-                                isOnline
-                                    ? Icons.location_on
-                                    : Icons.location_off,
-                                color: isOnline ? Colors.green : Colors.grey,
-                                size: 18,
-                              ),
+                        Icon(
+                          isOnline ? Icons.location_on : Icons.location_off,
+                          color: isOnline ? Colors.green : Colors.grey,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isLoading
-                                  ? 'Loading...'
-                                  : isOnline
-                                  ? 'Online'
-                                  : 'Offline',
+                              isOnline ? 'Online' : 'Offline',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: isLoading
-                                    ? Colors.orange
-                                    : isOnline
-                                    ? Colors.green
-                                    : Colors.grey,
+                                color: isOnline ? Colors.green : Colors.grey,
                               ),
                             ),
                           ],
