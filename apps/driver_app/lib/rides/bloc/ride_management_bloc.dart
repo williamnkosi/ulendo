@@ -411,6 +411,32 @@ class RideManagementBloc
         return;
       }
 
+      // Calculate polylines from driver's current location to dropoff
+      Set<Polyline> polylines = {};
+      if (_currentLocation != null) {
+        final driverLat = _currentLocation!.latitude;
+        final driverLng = _currentLocation!.longitude;
+        final dropoffLat = _currentRide!.dropoff.lat;
+        final dropoffLng = _currentRide!.dropoff.lng;
+
+        _logger.i(
+          '🎯 Calculating polylines to destination: '
+          'from (${driverLat.toStringAsFixed(4)}, ${driverLng.toStringAsFixed(4)}) '
+          'to (${dropoffLat.toStringAsFixed(4)}, ${dropoffLng.toStringAsFixed(4)})',
+        );
+
+        polylines = await _polylineService.getPolylines(
+          pickupLat: driverLat,
+          pickupLng: driverLng,
+          dropoffLat: dropoffLat,
+          dropoffLng: dropoffLng,
+        );
+
+        _logger.i('💡 Emitting EnRouteToDestination state with ${polylines.length} polylines');
+      } else {
+        _logger.w('⚠️ Current location is null, cannot calculate polylines to destination');
+      }
+
       emit(
         EnRouteToDestination(
           rideRequest: _currentRide!,
@@ -418,9 +444,11 @@ class RideManagementBloc
               _currentLocation ??
               const LocationData(driverId: '', latitude: 0, longitude: 0),
           rideId: _currentRideId!,
+          polylines: polylines,
         ),
       );
     } catch (e) {
+      _logger.e('Error in _onPassengerPickedUp: ${e.toString()}');
       emit(RideManagementError('Failed to pick up passenger: ${e.toString()}'));
     }
   }
@@ -533,6 +561,7 @@ class RideManagementBloc
           currentLocation: event.currentLocation,
           rideId: s.rideId,
           estimatedTimeToDestination: s.estimatedTimeToDestination,
+          polylines: s.polylines,
         ),
       );
     } else if (state is RideCompleted) {
@@ -571,6 +600,7 @@ class RideManagementBloc
           currentLocation: s.currentLocation,
           rideId: s.rideId,
           estimatedTimeToDestination: event.estimatedTime,
+          polylines: s.polylines,
         ),
       );
     }

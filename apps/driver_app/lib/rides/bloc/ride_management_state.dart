@@ -113,12 +113,14 @@ class EnRouteToDestination extends RideManagementState {
   final LocationData currentLocation;
   final String rideId;
   final double? estimatedTimeToDestination;
+  final Set<Polyline>? polylines;
 
   const EnRouteToDestination({
     required this.rideRequest,
     required this.currentLocation,
     required this.rideId,
     this.estimatedTimeToDestination,
+    this.polylines,
   });
 
   @override
@@ -127,6 +129,7 @@ class EnRouteToDestination extends RideManagementState {
     currentLocation,
     rideId,
     estimatedTimeToDestination,
+    polylines,
   ];
 }
 

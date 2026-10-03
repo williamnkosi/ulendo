@@ -22,11 +22,11 @@ class WaitingScreen extends StatelessWidget {
     return BlocBuilder<RideManagementBloc, RideManagementState>(
       builder: (context, state) {
         if (state is! Waiting) {
-          logger.w('WaitingScreen received non-Waiting state: ${state.runtimeType}');
+          logger.w(
+            'WaitingScreen received non-Waiting state: ${state.runtimeType}',
+          );
           return Scaffold(
-            body: Center(
-              child: Text('Invalid state: ${state.runtimeType}'),
-            ),
+            body: Center(child: Text('Invalid state: ${state.runtimeType}')),
           );
         }
 
@@ -43,7 +43,9 @@ class WaitingScreen extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        logger.i('Passenger boarded - starting route to destination');
+                        logger.i(
+                          'Passenger boarded - starting route to destination',
+                        );
                         context.read<RideManagementBloc>().add(
                           const PassengerPickedUpEvent(),
                         );
@@ -73,11 +75,7 @@ class WaitingScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.green,
-                          size: 80,
-                        ),
+                        Icon(Icons.check_circle, color: Colors.green, size: 80),
                         const SizedBox(height: 16),
                         const Text(
                           'You\'ve Arrived!',
@@ -89,10 +87,7 @@ class WaitingScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         const Text(
                           'Passenger has been notified',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         const SizedBox(height: 24),
                         Padding(
