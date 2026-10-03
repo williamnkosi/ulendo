@@ -27,6 +27,7 @@ dependencies:
   permission_handler: ^13.0.2
   equatable: ^3.0.0
   logger: ^2.8.0
+  dotenv: ^4.2.0
 
 dev_dependencies:
   flutter_test:

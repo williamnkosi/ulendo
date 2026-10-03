@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
 /// Service to handle polyline generation for routes on Google Maps
 class PolylineService {
-  final String _googleMapsApiKey;
+  late final String _googleMapsApiKey;
   final Logger _logger = Logger(
     printer: PrefixPrinter(
       PrettyPrinter(methodCount: 0),
@@ -19,8 +20,12 @@ class PolylineService {
     ),
   );
 
-  PolylineService({required String googleMapsApiKey})
-      : _googleMapsApiKey = googleMapsApiKey;
+  PolylineService() {
+    _googleMapsApiKey = dotenv.env['MAPS_API_KEY'] ?? '';
+    if (_googleMapsApiKey.isEmpty) {
+      _logger.w('MAPS_API_KEY not found in .env file');
+    }
+  }
 
   /// Get polylines between two locations using Google Directions API
   /// Returns a Set of Polyline objects that can be drawn on the map
@@ -61,8 +66,7 @@ class PolylineService {
         _logger.i('Polyline points: $polylinePoints');
 
         // Decode polyline points
-        final List<LatLng> decodedPoints =
-            _decodePolyline(polylinePoints);
+        final List<LatLng> decodedPoints = _decodePolyline(polylinePoints);
 
         _logger.i('Decoded ${decodedPoints.length} points from polyline');
 
@@ -123,24 +127,14 @@ class PolylineService {
       int dLng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
       lng += dLng;
 
-      points.add(
-        LatLng(
-          lat / 1e5,
-          lng / 1e5,
-        ),
-      );
+      points.add(LatLng(lat / 1e5, lng / 1e5));
     }
 
     return points;
   }
 
   /// Calculate distance between two points in kilometers
-  double calculateDistance(
-    double lat1,
-    double lng1,
-    double lat2,
-    double lng2,
-  ) {
+  double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
     const p = 0.017453292519943295;
     return 12742 *
         asin(
