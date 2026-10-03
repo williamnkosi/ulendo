@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:driver_app/location/location_tracking_bloc.dart';
+import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Widget that displays a live map of the driver's current location
@@ -18,7 +18,7 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  late final LocationTrackingBloc _locationBloc;
+  late final RideManagementBloc _rideBloc;
   
   Set<Marker> _markers = {};
   CameraPosition? _currentCameraPosition;
@@ -39,12 +39,12 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
   void initState() {
     super.initState();
     _currentCameraPosition = _kGooglePlex;
-    _locationBloc = context.read<LocationTrackingBloc>();
+    _rideBloc = context.read<RideManagementBloc>();
     _setupLocationStream();
   }
 
   void _setupLocationStream() {
-    _locationBloc.getLocationStream().listen(
+    _rideBloc.getLocationStream().listen(
       (locationData) {
         print(
           'Location update: ${locationData.latitude}, ${locationData.longitude}',

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:driver_app/location/location_tracking_bloc.dart';
+import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
 
 /// A reusable location tracking toggle button for the app bar
 class LocationTrackingToggle extends StatelessWidget {
@@ -8,19 +8,19 @@ class LocationTrackingToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LocationTrackingBloc, LocationTrackingState>(
+    return BlocListener<RideManagementBloc, RideManagementState>(
       listener: (context, state) {
-        if (state is LocationTrackingError) {
-          print('LocationTrackingError: ${state.message}');
+        if (state is RideManagementError) {
+          print('RideManagementError: ${state.message}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
-      child: BlocBuilder<LocationTrackingBloc, LocationTrackingState>(
+      child: BlocBuilder<RideManagementBloc, RideManagementState>(
         builder: (context, state) {
-          final isStreaming = state is LocationTrackingActive;
-          final isLoading = state is LocationTrackingLoading;
+          final isOnline = state is! Offline;
+          final isLoading = false;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -30,26 +30,26 @@ class LocationTrackingToggle extends StatelessWidget {
                     ? null
                     : () {
                         print(
-                          'Toggle tapped. Current state: $state, isStreaming: $isStreaming',
+                          'Toggle tapped. Current state: $state, isOnline: $isOnline',
                         );
-                        if (isStreaming) {
-                          print('Stopping location tracking');
-                          context.read<LocationTrackingBloc>().add(
-                            const StopLocationTracking(),
+                        if (isOnline) {
+                          print('Going offline');
+                          context.read<RideManagementBloc>().add(
+                            const GoOfflineEvent(),
                           );
                         } else {
-                          print('Starting location tracking');
-                          context.read<LocationTrackingBloc>().add(
-                            const StartLocationTracking(),
+                          print('Going online');
+                          context.read<RideManagementBloc>().add(
+                            const GoOnlineEvent(),
                           );
                         }
                       },
                 child: Tooltip(
                   message: isLoading
                       ? 'Loading...'
-                      : isStreaming
-                          ? 'Stop tracking'
-                          : 'Start tracking',
+                      : isOnline
+                      ? 'Go offline'
+                      : 'Go online',
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12.0,
@@ -59,9 +59,9 @@ class LocationTrackingToggle extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       color: isLoading
                           ? Colors.orange.withOpacity(0.15)
-                          : isStreaming
-                              ? Colors.green.withOpacity(0.15)
-                              : Colors.grey.withOpacity(0.15),
+                          : isOnline
+                          ? Colors.green.withOpacity(0.15)
+                          : Colors.grey.withOpacity(0.15),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -78,10 +78,10 @@ class LocationTrackingToggle extends StatelessWidget {
                                 ),
                               )
                             : Icon(
-                                isStreaming
+                                isOnline
                                     ? Icons.location_on
                                     : Icons.location_off,
-                                color: isStreaming ? Colors.green : Colors.grey,
+                                color: isOnline ? Colors.green : Colors.grey,
                                 size: 18,
                               ),
                         const SizedBox(width: 8),
@@ -92,27 +92,19 @@ class LocationTrackingToggle extends StatelessWidget {
                             Text(
                               isLoading
                                   ? 'Loading...'
-                                  : isStreaming
-                                      ? 'Online'
-                                      : 'Offline',
+                                  : isOnline
+                                  ? 'Online'
+                                  : 'Offline',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: isLoading
                                     ? Colors.orange
-                                    : isStreaming
-                                        ? Colors.green
-                                        : Colors.grey,
+                                    : isOnline
+                                    ? Colors.green
+                                    : Colors.grey,
                               ),
                             ),
-                            if (isStreaming && state is LocationTrackingActive)
-                              Text(
-                                'Every ${state.updateInterval.inSeconds}s',
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
                           ],
                         ),
                       ],
