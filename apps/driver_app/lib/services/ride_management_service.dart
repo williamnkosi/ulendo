@@ -51,9 +51,7 @@ class RideManagementService {
       if (e is RideManagementException) {
         rethrow;
       }
-      throw RideManagementException(
-        'Failed to accept ride: ${e.toString()}',
-      );
+      throw RideManagementException('Failed to accept ride: ${e.toString()}');
     }
   }
 
@@ -82,9 +80,7 @@ class RideManagementService {
       if (e is RideManagementException) {
         rethrow;
       }
-      throw RideManagementException(
-        'Failed to reject ride: ${e.toString()}',
-      );
+      throw RideManagementException('Failed to reject ride: ${e.toString()}');
     }
   }
 
@@ -131,9 +127,7 @@ class RideManagementService {
       if (e is RideManagementException) {
         rethrow;
       }
-      throw RideManagementException(
-        'Failed to cancel ride: ${e.toString()}',
-      );
+      throw RideManagementException('Failed to cancel ride: ${e.toString()}');
     }
   }
 }

@@ -196,7 +196,8 @@ class RideManagementBloc
       // First emit RideAccepted state
       emit(
         RideAccepted(
-          notification: _currentNotification ??
+          notification:
+              _currentNotification ??
               RideNotificationMessage(
                 rideId: _currentRideId!,
                 driverId: '',

@@ -93,14 +93,40 @@ class _DriverShellState extends State<DriverShell> {
         ),
       ],
       child: BlocListener<RideManagementBloc, RideManagementState>(
+        listenWhen: (previous, current) {
+          final isTransitionToOffered = current is RideOffered;
+          _logger.d(
+            'BlocListener: previous=$previous, current=$current, isTransitionToOffered=$isTransitionToOffered',
+          );
+          return isTransitionToOffered;
+        },
         listener: (context, state) {
+          _logger.i('Listener called with state: $state');
           if (state is RideOffered) {
             _logger.i('RideOffered state detected, navigating to ride details');
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const RideDetailsPage(),
-              ),
-            );
+            _logger.d('Context: $context');
+            _logger.d('Navigator state: ${Navigator.of(context).mounted}');
+
+            Future.delayed(const Duration(milliseconds: 100), () {
+              try {
+                _logger.i('About to push RideDetailsPage');
+                final rideManagementBloc = BlocProvider.of<RideManagementBloc>(
+                  context,
+                );
+                final result = Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        BlocProvider<RideManagementBloc>.value(
+                          value: rideManagementBloc,
+                          child: const RideDetailsPage(),
+                        ),
+                  ),
+                );
+                _logger.i('Navigation push result: $result');
+              } catch (e, stackTrace) {
+                _logger.e('Navigation error: $e\nStackTrace: $stackTrace');
+              }
+            });
           }
         },
         child: Scaffold(
