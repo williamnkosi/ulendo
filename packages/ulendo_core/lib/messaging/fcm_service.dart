@@ -115,7 +115,7 @@ class FCMService {
   void setupForegroundMessageHandler(void Function(RemoteMessage) handler) {
     _logger.d('Setting up foreground message handler');
     _foregroundSubscription = FirebaseMessaging.onMessage.listen((message) {
-      _logger.i('Foreground message received: ${message.notification?.title}');
+      _logger.i('Foreground message received: ${message.toMap()}');
       handler(message);
     });
     _logger.d('Foreground message handler setup complete');

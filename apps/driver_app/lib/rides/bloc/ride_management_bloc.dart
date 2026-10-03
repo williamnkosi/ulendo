@@ -1,8 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:driver_app/services/location_service.dart';
+import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
 import 'package:ulendo_models/models/location_data.dart';
 import 'package:ulendo_models/models/ride_request.dart';
+import 'package:ulendo_models/models/ride_notification_message.dart';
+import 'package:logger/logger.dart';
 
 part 'ride_management_event.dart';
 part 'ride_management_state.dart';
@@ -12,15 +15,29 @@ part 'ride_management_state.dart';
 class RideManagementBloc
     extends Bloc<RideManagementEvent, RideManagementState> {
   final LocationService _locationService;
+  final NotificationHubBloc _notificationHubBloc;
+
+  final Logger _logger = Logger(
+    printer: PrefixPrinter(
+      PrettyPrinter(methodCount: 0),
+      info: '[RideManagementBloc]',
+      error: '[RideManagementBloc]',
+      warning: '[RideManagementBloc]',
+      debug: '[RideManagementBloc]',
+    ),
+  );
 
   // Store ride and location data
   RideRequest? _currentRide;
   String? _currentRideId;
   LocationData? _currentLocation;
 
-  RideManagementBloc({required LocationService locationService})
-    : _locationService = locationService,
-      super(const Offline()) {
+  RideManagementBloc({
+    required LocationService locationService,
+    required NotificationHubBloc notificationHubBloc,
+  }) : _locationService = locationService,
+       _notificationHubBloc = notificationHubBloc,
+       super(const Offline()) {
     on<GoOnlineEvent>(_onGoOnline);
     on<GoOfflineEvent>(_onGoOffline);
     on<RideOfferReceivedEvent>(_onRideOfferReceived);
@@ -31,6 +48,40 @@ class RideManagementBloc
     on<CompleteRideEvent>(_onCompleteRide);
     on<UpdateLocationEvent>(_onUpdateLocation);
     on<UpdateEstimatedTimeEvent>(_onUpdateEstimatedTime);
+
+    // Listen to notification hub for ride offers
+    _listenToNotifications();
+  }
+
+  /// Listen to notifications from NotificationHubBloc
+  void _listenToNotifications() {
+    _notificationHubBloc.stream.listen((state) {
+      if (state is NotificationReceivedState) {
+        _logger.d('Received notification in RideManagementBloc');
+
+        try {
+          // Parse notification data using freezed model
+          final rideNotification = RideNotificationMessage.fromJson(
+            state.message.data.cast<String, dynamic>(),
+          );
+
+          _logger.i(
+            'Processing ride offer from notification: ${rideNotification.rideId}',
+          );
+
+          // Log ride details
+          _logger.i('Ride notification details:');
+          _logger.i('  Ride ID: ${rideNotification.rideId}');
+          _logger.i('  Driver ID: ${rideNotification.driverId}');
+          _logger.i('  Pickup: ${rideNotification.pickupAddress}');
+          _logger.i('  Dropoff: ${rideNotification.dropoffAddress}');
+          _logger.i('  Distance: ${rideNotification.distanceToPickup}km');
+          _logger.i('  Status: ${rideNotification.status}');
+        } catch (e) {
+          _logger.e('Error processing ride offer from notification', error: e);
+        }
+      }
+    });
   }
 
   /// Handle going online
