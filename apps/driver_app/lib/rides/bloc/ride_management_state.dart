@@ -37,6 +37,20 @@ class RideOffered extends RideManagementState {
   List<Object?> get props => [notification, currentLocation];
 }
 
+/// Driver has accepted a ride offer
+class RideAccepted extends RideManagementState {
+  final RideNotificationMessage notification;
+  final LocationData currentLocation;
+
+  const RideAccepted({
+    required this.notification,
+    required this.currentLocation,
+  });
+
+  @override
+  List<Object?> get props => [notification, currentLocation];
+}
+
 /// Driver is en route to pickup location
 class EnRouteToPickup extends RideManagementState {
   final RideRequest rideRequest;
