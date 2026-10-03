@@ -32,6 +32,7 @@ class RideManagementBloc
   RideRequest? _currentRide;
   String? _currentRideId;
   LocationData? _currentLocation;
+  RideNotificationMessage? _currentNotification;
 
   RideManagementBloc({
     required LocationService locationService,
@@ -144,6 +145,7 @@ class RideManagementBloc
   ) async {
     try {
       _currentRideId = event.notification.rideId;
+      _currentNotification = event.notification;
 
       // Convert notification to RideRequest for compatibility with other states
       _currentRide = RideRequest(
@@ -189,6 +191,28 @@ class RideManagementBloc
         return;
       }
 
+      _logger.i('Driver accepted ride: $_currentRideId');
+
+      // First emit RideAccepted state
+      emit(
+        RideAccepted(
+          notification: _currentNotification ??
+              RideNotificationMessage(
+                rideId: _currentRideId!,
+                driverId: '',
+                pickupAddress: _currentRide!.pickup.address,
+                dropoffAddress: _currentRide!.dropoff.address,
+                pickupLat: _currentRide!.pickup.lat,
+                pickupLng: _currentRide!.pickup.lng,
+                status: 'driver_accepted',
+              ),
+          currentLocation:
+              _currentLocation ??
+              const LocationData(driverId: '', latitude: 0, longitude: 0),
+        ),
+      );
+
+      // Then transition to EnRouteToPickup
       emit(
         EnRouteToPickup(
           rideRequest: _currentRide!,

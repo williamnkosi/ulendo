@@ -98,9 +98,7 @@ class _DriverShellState extends State<DriverShell> {
             _logger.i('RideOffered state detected, navigating to ride details');
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => RideDetailsPage(
-                  notification: state.notification,
-                ),
+                builder: (context) => const RideDetailsPage(),
               ),
             );
           }
