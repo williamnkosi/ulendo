@@ -7,3 +7,4 @@ export 'src/user/user_model.dart';
 export 'models/location_data.dart';
 export 'models/location.dart';
 export 'models/ride_request.dart';
+export 'models/ride_notification_message.dart';
