@@ -86,8 +86,8 @@ class NotificationHubBloc
       _logger.i(
         'Processing notification: ${event.message.notification?.title}',
       );
-      // Notification is processed by listeners in other BLoCs
-      // This event ensures we can track notifications if needed
+      // Emit the notification received state so other BLoCs can react
+      emit(NotificationReceivedState(message: event.message));
     } catch (e) {
       _logger.e('Error processing notification', error: e);
       emit(FCMError('Error processing notification: ${e.toString()}'));

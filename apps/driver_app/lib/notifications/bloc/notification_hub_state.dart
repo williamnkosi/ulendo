@@ -32,3 +32,12 @@ class FCMError extends NotificationHubState {
   @override
   List<Object?> get props => [message];
 }
+
+class NotificationReceivedState extends NotificationHubState {
+  final RemoteMessage message;
+
+  const NotificationReceivedState({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

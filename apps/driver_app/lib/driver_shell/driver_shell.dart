@@ -84,7 +84,10 @@ class _DriverShellState extends State<DriverShell> {
         BlocProvider<RideManagementBloc>(
           create: (context) {
             _logger.d('Creating RideManagementBloc');
-            return RideManagementBloc(locationService: LocationService());
+            return RideManagementBloc(
+              locationService: LocationService(),
+              notificationHubBloc: _notificationHubBloc,
+            );
           },
         ),
       ],
