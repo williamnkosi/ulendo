@@ -20,7 +20,6 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
       Completer<GoogleMapController>();
 
   Set<Marker> _markers = {};
-  Set<Polyline> _polylines = {};
   CameraPosition? _currentCameraPosition;
 
   final Logger _logger = Logger(
@@ -38,7 +37,9 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
     super.initState();
     // Initialize with current state if it has location
     final bloc = context.read<RideManagementBloc>();
-    _logger.i('Initializing LiveLocationMap - Current bloc state: ${bloc.state.runtimeType}');
+    _logger.i(
+      'Initializing LiveLocationMap - Current bloc state: ${bloc.state.runtimeType}',
+    );
     _updateMapForState(bloc.state);
   }
 
@@ -47,10 +48,6 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
     return BlocListener<RideManagementBloc, RideManagementState>(
       listener: (context, state) {
         _logger.d('State changed: ${state.runtimeType}');
-        _logger.d('Is EnRouteToPickup: ${state is EnRouteToPickup}');
-        if (state is EnRouteToPickup) {
-          _logger.i('EnRouteToPickup state detected - polylines: ${state.polylines?.length ?? 0}');
-        }
         _updateMapForState(state);
       },
       child: Scaffold(
@@ -71,7 +68,7 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
                 mapType: MapType.normal,
                 initialCameraPosition: _currentCameraPosition!,
                 markers: _markers,
-                polylines: _polylines,
+                polylines: const {},
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
                 },
@@ -82,36 +79,14 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
 
   void _updateMapForState(RideManagementState state) {
     final location = _getCurrentLocationFromState(state);
-    _logger.d('Updating map for state: ${state.runtimeType}, Location: $location');
-
-    // Handle polylines for EnRouteToPickup state
-    if (state is EnRouteToPickup) {
-      _logger.d('State IS EnRouteToPickup');
-      _logger.d('state.polylines != null: ${state.polylines != null}');
-      _logger.d('state.polylines length: ${state.polylines?.length ?? 'NULL'}');
-      
-      if (state.polylines != null) {
-        _logger.i('EnRouteToPickup state - Rendering ${state.polylines!.length} polylines');
-        setState(() {
-          _polylines = state.polylines!;
-          _logger.i('Polylines set in state: $_polylines');
-        });
-      } else {
-        _logger.w('EnRouteToPickup state but polylines is NULL');
-      }
-    } else {
-      _logger.d('State is NOT EnRouteToPickup, current type: ${state.runtimeType}');
-      // Clear polylines for other states
-      if (_polylines.isNotEmpty) {
-        _logger.d('Clearing polylines for state: ${state.runtimeType}');
-        setState(() {
-          _polylines = {};
-        });
-      }
-    }
+    _logger.d(
+      'Updating map for state: ${state.runtimeType}, Location: $location',
+    );
 
     if (location != null) {
-      _logger.i('Updating marker location: (${location.latitude}, ${location.longitude})');
+      _logger.i(
+        'Updating marker location: (${location.latitude}, ${location.longitude})',
+      );
 
       final newMarker = Marker(
         markerId: const MarkerId('driver_location'),
@@ -134,7 +109,9 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
       // Animate camera to new position
       _controller.future
           .then((controller) {
-            _logger.d('Animating camera to new position: (${location.latitude}, ${location.longitude})');
+            _logger.d(
+              'Animating camera to new position: (${location.latitude}, ${location.longitude})',
+            );
             controller.animateCamera(
               CameraUpdate.newCameraPosition(_currentCameraPosition!),
             );

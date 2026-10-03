@@ -273,7 +273,9 @@ class RideManagementBloc
   ) async {
     try {
       if (_currentRide == null || _currentRideId == null) {
-        _logger.e('Cannot accept ride: _currentRide is ${_currentRide == null ? 'NULL' : 'SET'}, _currentRideId is ${_currentRideId == null ? 'NULL' : 'SET'}');
+        _logger.e(
+          'Cannot accept ride: _currentRide is ${_currentRide == null ? 'NULL' : 'SET'}, _currentRideId is ${_currentRideId == null ? 'NULL' : 'SET'}',
+        );
         emit(const RideManagementError('No ride to accept'));
         return;
       }
@@ -315,8 +317,13 @@ class RideManagementBloc
         'Fetching polylines from ($pickupLat, $pickupLng) to ($dropoffLat, $dropoffLng)',
       );
 
-      if (pickupLat == 0.0 || pickupLng == 0.0 || dropoffLat == 0.0 || dropoffLng == 0.0) {
-        _logger.e('INVALID COORDINATES: Pickup($pickupLat, $pickupLng) Dropoff($dropoffLat, $dropoffLng)');
+      if (pickupLat == 0.0 ||
+          pickupLng == 0.0 ||
+          dropoffLat == 0.0 ||
+          dropoffLng == 0.0) {
+        _logger.e(
+          'INVALID COORDINATES: Pickup($pickupLat, $pickupLng) Dropoff($dropoffLat, $dropoffLng)',
+        );
       }
 
       try {
@@ -326,14 +333,28 @@ class RideManagementBloc
           dropoffLat: dropoffLat,
           dropoffLng: dropoffLng,
         );
-        _logger.i('Polylines fetched successfully: ${polylines.length} polylines');
+        _logger.i(
+          'Polylines fetched successfully: ${polylines.length} polylines',
+        );
+        if (polylines.isNotEmpty) {
+          final poly = polylines.first;
+          _logger.i('First polyline: id=${poly.polylineId.value}, points=${poly.points.length}, color=${poly.color}, width=${poly.width}');
+        }
       } catch (polylineError) {
         _logger.e('Failed to fetch polylines: $polylineError');
+        polylines = {};
         // Continue even if polylines fail - non-critical feature
       }
 
       // Transition to EnRouteToPickup with polylines
-      _logger.i('Emitting EnRouteToPickup state with ${polylines?.length ?? 0} polylines');
+      _logger.i(
+        'Emitting EnRouteToPickup state with ${polylines.length} polylines',
+      );
+      if (polylines.isNotEmpty) {
+        _logger.i('🎯 EMITTING WITH POLYLINES - Details: ${polylines.map((p) => 'id=${p.polylineId.value}, points=${p.points.length}').join(', ')}');
+      } else {
+        _logger.w('⚠️ EMITTING WITHOUT POLYLINES - polylines is EMPTY');
+      }
       emit(
         EnRouteToPickup(
           rideRequest: _currentRide!,
