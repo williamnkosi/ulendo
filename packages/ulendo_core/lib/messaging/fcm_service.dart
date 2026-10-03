@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 import 'dart:async';
 import 'dart:io';
@@ -10,6 +11,15 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 class FCMService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final Logger _logger = Logger(
+    printer: PrefixPrinter(
+      PrettyPrinter(methodCount: 0),
+      info: '[FCMService]',
+      error: '[FCMService]',
+      warning: '[FCMService]',
+      debug: '[FCMService]',
+    ),
+  );
 
   late String _driverId;
   late DatabaseReference _driverRef;
@@ -22,8 +32,11 @@ class FCMService {
     _driverRef = _database.ref('drivers/$_driverId');
 
     try {
+      _logger.i('Initializing FCMService for driver: $_driverId');
+
       // Request notification permissions (iOS)
       if (Platform.isIOS) {
+        _logger.d('Requesting iOS notification permissions');
         await _firebaseMessaging.requestPermission(
           alert: true,
           announcement: false,
@@ -33,6 +46,7 @@ class FCMService {
           provisional: false,
           sound: true,
         );
+        _logger.d('iOS notification permissions requested');
       }
 
       // Get and store FCM token
@@ -40,12 +54,13 @@ class FCMService {
 
       // Listen for token refresh
       _firebaseMessaging.onTokenRefresh.listen((newToken) {
+        _logger.d('FCM token refresh detected');
         _updateFCMToken(newToken);
       });
 
-      print('FCMService initialized for driver: $_driverId');
+      _logger.i('FCMService successfully initialized for driver: $_driverId');
     } catch (e) {
-      print('FCMService initialization error: $e');
+      _logger.e('FCMService initialization error', error: e);
       rethrow;
     }
   }
@@ -54,10 +69,10 @@ class FCMService {
   Future<String?> getToken() async {
     try {
       final token = await _firebaseMessaging.getToken();
-      print('FCM Token: $token');
+      _logger.d('FCM Token retrieved: ${token?.substring(0, 20)}...');
       return token;
     } catch (e) {
-      print('Error getting FCM token: $e');
+      _logger.e('Error getting FCM token', error: e);
       return null;
     }
   }
@@ -65,38 +80,45 @@ class FCMService {
   /// Store FCM token in Firebase database
   Future<void> _storeFCMToken() async {
     try {
+      _logger.d('Storing FCM token for driver: $_driverId');
       final token = await getToken();
       if (token != null) {
         await _driverRef.update({
           'fcmToken': token,
           'fcmTokenUpdatedAt': DateTime.now().toIso8601String(),
         });
-        print('FCM token stored successfully');
+        _logger.i('FCM token stored successfully for driver: $_driverId');
+      } else {
+        _logger.w('FCM token is null, cannot store');
       }
     } catch (e) {
-      print('Error storing FCM token: $e');
+      _logger.e('Error storing FCM token', error: e);
     }
   }
 
   /// Update FCM token when it refreshes
   Future<void> _updateFCMToken(String newToken) async {
     try {
+      _logger.d('Updating FCM token for driver: $_driverId');
       await _driverRef.update({
         'fcmToken': newToken,
         'fcmTokenUpdatedAt': DateTime.now().toIso8601String(),
       });
-      print('FCM token updated: $newToken');
+      _logger.i('FCM token updated successfully for driver: $_driverId');
     } catch (e) {
-      print('Error updating FCM token: $e');
+      _logger.e('Error updating FCM token', error: e);
     }
   }
 
   /// Setup foreground message handler
   /// Called when notification is received while app is open
-  Future<void> setupForegroundMessageHandler(
-    void Function(RemoteMessage) handler,
-  ) async {
-    _foregroundSubscription = FirebaseMessaging.onMessage.listen(handler);
+  void setupForegroundMessageHandler(void Function(RemoteMessage) handler) {
+    _logger.d('Setting up foreground message handler');
+    _foregroundSubscription = FirebaseMessaging.onMessage.listen((message) {
+      _logger.i('Foreground message received: ${message.notification?.title}');
+      handler(message);
+    });
+    _logger.d('Foreground message handler setup complete');
   }
 
   /// Setup background message handler
@@ -104,29 +126,48 @@ class FCMService {
   static void setupBackgroundMessageHandler(
     Future<void> Function(RemoteMessage) handler,
   ) {
-    FirebaseMessaging.onBackgroundMessage(handler);
+    final logger = Logger(
+      printer: PrefixPrinter(
+        PrettyPrinter(methodCount: 0),
+        info: '[FCMService]',
+        error: '[FCMService]',
+        warning: '[FCMService]',
+        debug: '[FCMService]',
+      ),
+    );
+    logger.d('Setting up background message handler');
+    FirebaseMessaging.onBackgroundMessage((message) async {
+      logger.i('Background message received: ${message.notification?.title}');
+      await handler(message);
+    });
   }
 
   /// Setup message opened handler
   /// Called when user taps on notification (app closed or background)
-  Future<void> setupMessageOpenedHandler(
-    void Function(RemoteMessage) handler,
-  ) async {
-    _messageOpenedSubscription = FirebaseMessaging.onMessageOpenedApp.listen(
-      handler,
-    );
+  void setupMessageOpenedHandler(void Function(RemoteMessage) handler) {
+    _logger.d('Setting up message opened handler');
+    _messageOpenedSubscription = FirebaseMessaging.onMessageOpenedApp.listen((
+      message,
+    ) {
+      _logger.i(
+        'Message opened from notification: ${message.notification?.title}',
+      );
+      handler(message);
+    });
+    _logger.d('Message opened handler setup complete');
   }
 
   /// Delete FCM token (cleanup when driver logs out)
   Future<void> deleteFCMToken() async {
     try {
+      _logger.d('Deleting FCM token for driver: $_driverId');
       await _foregroundSubscription?.cancel();
       await _messageOpenedSubscription?.cancel();
       await _driverRef.update({'fcmToken': null});
       await _firebaseMessaging.deleteToken();
-      print('FCM token deleted');
+      _logger.i('FCM token deleted successfully for driver: $_driverId');
     } catch (e) {
-      print('Error deleting FCM token: $e');
+      _logger.e('Error deleting FCM token', error: e);
     }
   }
 }
