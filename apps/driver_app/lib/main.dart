@@ -18,10 +18,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables from .env file
   await dotenv.load();
-  
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Setup background message handler before running the app

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:driver_app/services/location_service.dart';
+import 'package:driver_app/services/polyline_service.dart';
 import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
 import 'package:ulendo_models/models/location_data.dart';
 import 'package:ulendo_models/models/location.dart';
@@ -17,6 +18,7 @@ class RideManagementBloc
     extends Bloc<RideManagementEvent, RideManagementState> {
   final LocationService _locationService;
   final NotificationHubBloc _notificationHubBloc;
+  final PolylineService _polylineService;
 
   final Logger _logger = Logger(
     printer: PrefixPrinter(
@@ -37,8 +39,10 @@ class RideManagementBloc
   RideManagementBloc({
     required LocationService locationService,
     required NotificationHubBloc notificationHubBloc,
+    required PolylineService polylineService,
   }) : _locationService = locationService,
        _notificationHubBloc = notificationHubBloc,
+       _polylineService = polylineService,
        super(const Offline()) {
     on<GoOnlineEvent>(_onGoOnline);
     on<GoOfflineEvent>(_onGoOffline);
@@ -54,6 +58,9 @@ class RideManagementBloc
     // Listen to notification hub for ride offers
     _listenToNotifications();
   }
+
+  /// Getter to access the polyline service
+  PolylineService get polylineService => _polylineService;
 
   /// Listen to notifications from NotificationHubBloc
   void _listenToNotifications() {
