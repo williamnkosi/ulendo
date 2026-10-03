@@ -200,9 +200,9 @@ class RideManagementBloc
 
       _logger.i('Driver accepted ride: $_currentRideId');
 
-      // First emit RideAccepted state
+      // Emit loading state while processing
       emit(
-        RideAccepted(
+        RideAcceptanceLoading(
           notification:
               _currentNotification ??
               RideNotificationMessage(
@@ -220,7 +220,25 @@ class RideManagementBloc
         ),
       );
 
-      // Then transition to EnRouteToPickup
+      // Fetch polylines from pickup to dropoff
+      _logger.i(
+        'Fetching polylines from (${_currentRide!.pickup.lat}, ${_currentRide!.pickup.lng}) to (${_currentRide!.dropoff.lat}, ${_currentRide!.dropoff.lng})',
+      );
+      
+      try {
+        await _polylineService.getPolylines(
+          pickupLat: _currentRide!.pickup.lat,
+          pickupLng: _currentRide!.pickup.lng,
+          dropoffLat: _currentRide!.dropoff.lat,
+          dropoffLng: _currentRide!.dropoff.lng,
+        );
+        _logger.i('Polylines fetched successfully');
+      } catch (polylineError) {
+        _logger.w('Failed to fetch polylines: $polylineError');
+        // Continue even if polylines fail - non-critical feature
+      }
+
+      // Transition to EnRouteToPickup
       emit(
         EnRouteToPickup(
           rideRequest: _currentRide!,

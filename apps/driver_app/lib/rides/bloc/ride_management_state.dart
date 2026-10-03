@@ -51,6 +51,20 @@ class RideAccepted extends RideManagementState {
   List<Object?> get props => [notification, currentLocation];
 }
 
+/// Loading state while processing ride acceptance and fetching polylines
+class RideAcceptanceLoading extends RideManagementState {
+  final RideNotificationMessage notification;
+  final LocationData currentLocation;
+
+  const RideAcceptanceLoading({
+    required this.notification,
+    required this.currentLocation,
+  });
+
+  @override
+  List<Object?> get props => [notification, currentLocation];
+}
+
 /// Driver is en route to pickup location
 class EnRouteToPickup extends RideManagementState {
   final RideRequest rideRequest;
