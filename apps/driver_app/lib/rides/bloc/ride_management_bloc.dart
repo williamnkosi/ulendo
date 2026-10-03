@@ -43,7 +43,20 @@ class RideManagementBloc
       const interval = Duration(seconds: 10);
       await _locationService.startLocationStreaming(updateInterval: interval);
 
-      // If we have current location, emit it
+      // Listen to location updates and emit Online state with each update
+      _locationService.listenToLocationUpdates().listen(
+        (locationData) {
+          _currentLocation = locationData;
+          add(UpdateLocationEvent(locationData));
+        },
+        onError: (error) {
+          emit(
+            RideManagementError('Location stream error: ${error.toString()}'),
+          );
+        },
+      );
+
+      // Emit initial Online state
       emit(Online(currentLocation: _currentLocation));
     } catch (e) {
       emit(RideManagementError('Failed to go online: ${e.toString()}'));
@@ -317,11 +330,6 @@ class RideManagementBloc
         ),
       );
     }
-  }
-
-  /// Get stream of location updates
-  Stream<LocationData> getLocationStream() {
-    return _locationService.listenToLocationUpdates();
   }
 
   @override

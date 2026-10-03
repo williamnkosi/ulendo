@@ -6,7 +6,7 @@ import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Widget that displays a live map of the driver's current location
-/// Updates in real-time as location data streams from the LocationTrackingBloc
+/// Updates in real-time as location data is emitted through RideManagementBloc state
 class LiveLocationMap extends StatefulWidget {
   const LiveLocationMap({super.key});
 
@@ -18,90 +18,98 @@ class _LiveLocationMapState extends State<LiveLocationMap> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  late final RideManagementBloc _rideBloc;
-
   Set<Marker> _markers = {};
   CameraPosition? _currentCameraPosition;
-
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
-
-  static const CameraPosition _kLake = CameraPosition(
-    bearing: 192.8334901395799,
-    target: LatLng(37.43296265331129, -122.08832357078792),
-    tilt: 59.440717697143555,
-    zoom: 19.151926040649414,
-  );
 
   @override
   void initState() {
     super.initState();
-    _currentCameraPosition = _kGooglePlex;
-    _rideBloc = context.read<RideManagementBloc>();
-    _setupLocationStream();
-  }
-
-  void _setupLocationStream() {
-    _rideBloc.getLocationStream().listen(
-      (locationData) {
-        print(
-          'Location update: ${locationData.latitude}, ${locationData.longitude}',
-        );
-
-        final newMarker = Marker(
-          markerId: const MarkerId('driver_location'),
-          position: LatLng(locationData.latitude, locationData.longitude),
-          infoWindow: const InfoWindow(
-            title: 'Driver Location',
-            snippet: 'Current position',
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        );
-
-        setState(() {
-          _markers = {newMarker};
-          _currentCameraPosition = CameraPosition(
-            target: LatLng(locationData.latitude, locationData.longitude),
-            zoom: 16.0,
-          );
-        });
-
-        // Animate camera to new position
-        _controller.future.then((controller) {
-          controller.animateCamera(
-            CameraUpdate.newCameraPosition(_currentCameraPosition!),
-          );
-        });
-      },
-      onError: (error) {
-        print('Location stream error: $error');
-      },
-    );
+    // Initialize with current state if it has location
+    final bloc = context.read<RideManagementBloc>();
+    print('LiveLocationMap initState - Current bloc state: ${bloc.state}');
+    _updateMapForState(bloc.state);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GoogleMap(
-        mapType: MapType.normal,
-        initialCameraPosition: _currentCameraPosition ?? _kGooglePlex,
-        markers: _markers,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: const Text('To the lake!'),
-        icon: const Icon(Icons.directions_boat),
+    return BlocListener<RideManagementBloc, RideManagementState>(
+      listener: (context, state) {
+        print('LiveLocationMap BlocListener - State: ${state.runtimeType}');
+        _updateMapForState(state);
+      },
+      child: Scaffold(
+        body: _currentCameraPosition == null
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Waiting for location...\nCurrent position: $_currentCameraPosition',
+                    ),
+                  ],
+                ),
+              )
+            : GoogleMap(
+                mapType: MapType.normal,
+                initialCameraPosition: _currentCameraPosition!,
+                markers: _markers,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+              ),
       ),
     );
   }
 
-  Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+  void _updateMapForState(RideManagementState state) {
+    final location = _getCurrentLocationFromState(state);
+    print(
+      '_updateMapForState - State: ${state.runtimeType}, Location: $location',
+    );
+
+    if (location != null) {
+      print('Location update: ${location.latitude}, ${location.longitude}');
+
+      final newMarker = Marker(
+        markerId: const MarkerId('driver_location'),
+        position: LatLng(location.latitude, location.longitude),
+        infoWindow: const InfoWindow(
+          title: 'Driver Location',
+          snippet: 'Current position',
+        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      );
+
+      setState(() {
+        _markers = {newMarker};
+        _currentCameraPosition = CameraPosition(
+          target: LatLng(location.latitude, location.longitude),
+          zoom: 16.0,
+        );
+      });
+
+      // Animate camera to new position
+      _controller.future
+          .then((controller) {
+            controller.animateCamera(
+              CameraUpdate.newCameraPosition(_currentCameraPosition!),
+            );
+          })
+          .catchError((error) {
+            print('Error animating camera: $error');
+          });
+    }
+  }
+
+  dynamic _getCurrentLocationFromState(RideManagementState state) {
+    if (state is Online) return state.currentLocation;
+    if (state is RideOffered) return state.currentLocation;
+    if (state is EnRouteToPickup) return state.currentLocation;
+    if (state is Waiting) return state.currentLocation;
+    if (state is EnRouteToDestination) return state.currentLocation;
+    if (state is RideCompleted) return state.currentLocation;
+    return null;
   }
 }
