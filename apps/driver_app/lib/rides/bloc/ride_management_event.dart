@@ -20,16 +20,12 @@ class GoOfflineEvent extends RideManagementEvent {
 
 /// A new ride has been offered to the driver
 class RideOfferReceivedEvent extends RideManagementEvent {
-  final RideRequest rideRequest;
-  final String rideId;
+  final RideNotificationMessage notification;
 
-  const RideOfferReceivedEvent({
-    required this.rideRequest,
-    required this.rideId,
-  });
+  const RideOfferReceivedEvent({required this.notification});
 
   @override
-  List<Object?> get props => [rideRequest, rideId];
+  List<Object?> get props => [notification];
 }
 
 /// Driver accepts the ride offer

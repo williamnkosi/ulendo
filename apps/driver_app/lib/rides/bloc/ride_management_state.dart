@@ -25,18 +25,16 @@ class Online extends RideManagementState {
 
 /// A ride has been offered to the driver
 class RideOffered extends RideManagementState {
-  final RideRequest rideRequest;
+  final RideNotificationMessage notification;
   final LocationData currentLocation;
-  final String rideId;
 
   const RideOffered({
-    required this.rideRequest,
+    required this.notification,
     required this.currentLocation,
-    required this.rideId,
   });
 
   @override
-  List<Object?> get props => [rideRequest, currentLocation, rideId];
+  List<Object?> get props => [notification, currentLocation];
 }
 
 /// Driver is en route to pickup location

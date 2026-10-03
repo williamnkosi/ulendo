@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:driver_app/services/location_service.dart';
 import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
 import 'package:ulendo_models/models/location_data.dart';
+import 'package:ulendo_models/models/location.dart';
 import 'package:ulendo_models/models/ride_request.dart';
 import 'package:ulendo_models/models/ride_notification_message.dart';
 import 'package:logger/logger.dart';
@@ -77,6 +78,9 @@ class RideManagementBloc
           _logger.i('  Dropoff: ${rideNotification.dropoffAddress}');
           _logger.i('  Distance: ${rideNotification.distanceToPickup}km');
           _logger.i('  Status: ${rideNotification.status}');
+
+          // Dispatch event to handle ride offer
+          add(RideOfferReceivedEvent(notification: rideNotification));
         } catch (e) {
           _logger.e('Error processing ride offer from notification', error: e);
         }
@@ -139,16 +143,32 @@ class RideManagementBloc
     Emitter<RideManagementState> emit,
   ) async {
     try {
-      _currentRide = event.rideRequest;
-      _currentRideId = event.rideId;
+      _currentRideId = event.notification.rideId;
+
+      // Convert notification to RideRequest for compatibility with other states
+      _currentRide = RideRequest(
+        pickup: Location(
+          address: event.notification.pickupAddress ?? '',
+          lat: event.notification.pickupLat ?? 0.0,
+          lng: event.notification.pickupLng ?? 0.0,
+        ),
+        dropoff: Location(
+          address: event.notification.dropoffAddress ?? '',
+          lat: 0.0,
+          lng: 0.0,
+        ),
+      );
+
+      _logger.i(
+        'Emitting RideOffered state for ride: ${event.notification.rideId}',
+      );
 
       emit(
         RideOffered(
-          rideRequest: event.rideRequest,
+          notification: event.notification,
           currentLocation:
               _currentLocation ??
               const LocationData(driverId: '', latitude: 0, longitude: 0),
-          rideId: event.rideId,
         ),
       );
     } catch (e) {
@@ -309,9 +329,8 @@ class RideManagementBloc
       final s = state as RideOffered;
       emit(
         RideOffered(
-          rideRequest: s.rideRequest,
+          notification: s.notification,
           currentLocation: event.currentLocation,
-          rideId: s.rideId,
         ),
       );
     } else if (state is EnRouteToPickup) {
