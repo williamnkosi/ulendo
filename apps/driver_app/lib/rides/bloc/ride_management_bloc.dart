@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:driver_app/services/location_service.dart';
 import 'package:driver_app/services/polyline_service.dart';
 import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
@@ -221,12 +222,13 @@ class RideManagementBloc
       );
 
       // Fetch polylines from pickup to dropoff
+      Set<Polyline>? polylines;
       _logger.i(
         'Fetching polylines from (${_currentRide!.pickup.lat}, ${_currentRide!.pickup.lng}) to (${_currentRide!.dropoff.lat}, ${_currentRide!.dropoff.lng})',
       );
       
       try {
-        await _polylineService.getPolylines(
+        polylines = await _polylineService.getPolylines(
           pickupLat: _currentRide!.pickup.lat,
           pickupLng: _currentRide!.pickup.lng,
           dropoffLat: _currentRide!.dropoff.lat,
@@ -238,7 +240,7 @@ class RideManagementBloc
         // Continue even if polylines fail - non-critical feature
       }
 
-      // Transition to EnRouteToPickup
+      // Transition to EnRouteToPickup with polylines
       emit(
         EnRouteToPickup(
           rideRequest: _currentRide!,
@@ -246,6 +248,7 @@ class RideManagementBloc
               _currentLocation ??
               const LocationData(driverId: '', latitude: 0, longitude: 0),
           rideId: _currentRideId!,
+          polylines: polylines,
         ),
       );
     } catch (e) {

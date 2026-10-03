@@ -71,12 +71,14 @@ class EnRouteToPickup extends RideManagementState {
   final LocationData currentLocation;
   final String rideId;
   final double? estimatedTimeToPickup;
+  final Set<Polyline>? polylines;
 
   const EnRouteToPickup({
     required this.rideRequest,
     required this.currentLocation,
     required this.rideId,
     this.estimatedTimeToPickup,
+    this.polylines,
   });
 
   @override
@@ -85,6 +87,7 @@ class EnRouteToPickup extends RideManagementState {
     currentLocation,
     rideId,
     estimatedTimeToPickup,
+    polylines,
   ];
 }
 
