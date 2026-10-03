@@ -24,8 +24,7 @@ class DateTimeConverter implements JsonConverter<DateTime, int> {
   const DateTimeConverter();
 
   @override
-  DateTime fromJson(int json) =>
-      DateTime.fromMillisecondsSinceEpoch(json);
+  DateTime fromJson(int json) => DateTime.fromMillisecondsSinceEpoch(json);
 
   @override
   int toJson(DateTime object) => object.millisecondsSinceEpoch;
@@ -41,6 +40,8 @@ abstract class RideNotificationMessage with _$RideNotificationMessage {
     @DoubleConverter() double? pickupLat,
     @DoubleConverter() double? pickupLng,
     String? dropoffAddress,
+    @DoubleConverter() double? dropoffLat,
+    @DoubleConverter() double? dropoffLng,
     @DoubleConverter() double? distanceToPickup,
     String? status,
     String? title,

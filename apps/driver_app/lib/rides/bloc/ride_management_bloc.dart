@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:driver_app/services/location_service.dart';
 import 'package:driver_app/services/polyline_service.dart';
+import 'package:driver_app/services/ride_management_service.dart';
 import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
 import 'package:ulendo_models/models/location_data.dart';
 import 'package:ulendo_models/models/location.dart';
@@ -20,6 +21,7 @@ class RideManagementBloc
   final LocationService _locationService;
   final NotificationHubBloc _notificationHubBloc;
   final PolylineService _polylineService;
+  final RideManagementService _rideManagementService;
 
   final Logger _logger = Logger(
     printer: PrefixPrinter(
@@ -41,9 +43,11 @@ class RideManagementBloc
     required LocationService locationService,
     required NotificationHubBloc notificationHubBloc,
     required PolylineService polylineService,
+    required RideManagementService rideManagementService,
   }) : _locationService = locationService,
        _notificationHubBloc = notificationHubBloc,
        _polylineService = polylineService,
+       _rideManagementService = rideManagementService,
        super(const Offline()) {
     on<GoOnlineEvent>(_onGoOnline);
     on<GoOfflineEvent>(_onGoOffline);
@@ -155,33 +159,101 @@ class RideManagementBloc
       _currentRideId = event.notification.rideId;
       _currentNotification = event.notification;
 
-      // Convert notification to RideRequest for compatibility with other states
+      _logger.i(
+        'Received ride offer: ${event.notification.rideId} from rider: ${event.notification.driverId}',
+      );
+
+      // Query database for full ride details using the service
+      final rideId = event.notification.rideId;
+
+      if (rideId == null || rideId.isEmpty) {
+        _logger.e('Invalid rideId received: $rideId');
+        emit(const RideManagementError('Invalid ride ID received'));
+        return;
+      }
+
+      _logger.i('Querying ride details for rideId: $rideId');
+
+      final rideData = await _rideManagementService.getRideDetails(rideId);
+
+      if (rideData == null) {
+        _logger.e('Ride data not found in database for rideId: $rideId');
+        emit(
+          RideManagementError(
+            'Ride data not found in database for rideId: $rideId',
+          ),
+        );
+        return;
+      }
+
+      _logger.d('Successfully fetched ride data: $rideData');
+
+      // Extract pickup and dropoff coordinates from database
+      final pickupData = rideData['pickup'] as Map<dynamic, dynamic>?;
+      final dropoffData = rideData['dropoff'] as Map<dynamic, dynamic>?;
+
+      if (pickupData == null || dropoffData == null) {
+        _logger.e('Pickup or dropoff data missing in ride record');
+        emit(
+          const RideManagementError(
+            'Invalid ride data: missing pickup or dropoff information',
+          ),
+        );
+        return;
+      }
+
+      // Extract location arrays [lat, lng]
+      final pickupLocation = pickupData['location'] as List<dynamic>;
+      final dropoffLocation = dropoffData['location'] as List<dynamic>;
+
+      final pickupLat = (pickupLocation[0] as num).toDouble();
+      final pickupLng = (pickupLocation[1] as num).toDouble();
+      final pickupAddress = (pickupData['address'] as String?) ?? '';
+
+      final dropoffLat = (dropoffLocation[0] as num).toDouble();
+      final dropoffLng = (dropoffLocation[1] as num).toDouble();
+      final dropoffAddress = (dropoffData['address'] as String?) ?? '';
+
+      _logger.i(
+        'Extracted ride coordinates - Pickup: ($pickupLat, $pickupLng), Dropoff: ($dropoffLat, $dropoffLng)',
+      );
+
+      // Create RideRequest with database coordinates
       _currentRide = RideRequest(
         pickup: Location(
-          address: event.notification.pickupAddress ?? '',
-          lat: event.notification.pickupLat ?? 0.0,
-          lng: event.notification.pickupLng ?? 0.0,
+          address: pickupAddress,
+          lat: pickupLat,
+          lng: pickupLng,
         ),
         dropoff: Location(
-          address: event.notification.dropoffAddress ?? '',
-          lat: 0.0,
-          lng: 0.0,
+          address: dropoffAddress,
+          lat: dropoffLat,
+          lng: dropoffLng,
         ),
       );
 
-      _logger.i(
-        'Emitting RideOffered state for ride: ${event.notification.rideId}',
+      _logger.i('Emitting RideOffered state for ride: $rideId');
+
+      // Create an updated notification with all the ride details from database
+      final enrichedNotification = event.notification.copyWith(
+        pickupLat: pickupLat,
+        pickupLng: pickupLng,
+        pickupAddress: pickupAddress,
+        dropoffLat: dropoffLat,
+        dropoffLng: dropoffLng,
+        dropoffAddress: dropoffAddress,
       );
 
       emit(
         RideOffered(
-          notification: event.notification,
+          notification: enrichedNotification,
           currentLocation:
               _currentLocation ??
               const LocationData(driverId: '', latitude: 0, longitude: 0),
         ),
       );
     } catch (e) {
+      _logger.e('Error in _onRideOfferReceived: $e');
       emit(
         RideManagementError('Failed to receive ride offer: ${e.toString()}'),
       );
@@ -226,7 +298,7 @@ class RideManagementBloc
       _logger.i(
         'Fetching polylines from (${_currentRide!.pickup.lat}, ${_currentRide!.pickup.lng}) to (${_currentRide!.dropoff.lat}, ${_currentRide!.dropoff.lng})',
       );
-      
+
       try {
         polylines = await _polylineService.getPolylines(
           pickupLat: _currentRide!.pickup.lat,

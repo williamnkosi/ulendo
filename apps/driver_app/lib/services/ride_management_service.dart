@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
 
 /// Exception for ride management service errors
 class RideManagementException implements Exception {
@@ -14,6 +15,15 @@ class RideManagementException implements Exception {
 class RideManagementService {
   final FirebaseDatabase _database = FirebaseDatabase.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Logger _logger = Logger(
+    printer: PrefixPrinter(
+      PrettyPrinter(methodCount: 0),
+      info: '[RideManagementService]',
+      error: '[RideManagementService]',
+      warning: '[RideManagementService]',
+      debug: '[RideManagementService]',
+    ),
+  );
 
   late final String _driverId;
 
@@ -29,7 +39,7 @@ class RideManagementService {
   /// Also updates the driver status to "on_ride"
   Future<void> acceptRide(String rideId) async {
     try {
-      print('RideManagementService: Attempting to accept ride: $rideId');
+      _logger.i('Attempting to accept ride: $rideId');
 
       // Update the ride status to "driver_accepted" using rideId as the key
       await _database.ref('active_rides/$rideId').update({
@@ -38,7 +48,7 @@ class RideManagementService {
         'acceptedDriver': _driverId,
       });
 
-      print('RideManagementService: Ride status updated to driver_accepted');
+      _logger.i('Ride status updated to driver_accepted: $rideId');
 
       // Update driver status to "on_ride"
       await _database.ref('drivers/$_driverId').update({
@@ -46,7 +56,7 @@ class RideManagementService {
         'updatedAt': DateTime.now().toIso8601String(),
       });
 
-      print('RideManagementService: Driver status updated to on_ride');
+      _logger.i('Driver status updated to on_ride');
     } catch (e) {
       if (e is RideManagementException) {
         rethrow;
@@ -58,7 +68,7 @@ class RideManagementService {
   /// Reject a ride by updating its status to "driver_rejected"
   Future<void> rejectRide(String rideId) async {
     try {
-      print('RideManagementService: Rejecting ride: $rideId');
+      _logger.i('Rejecting ride: $rideId');
 
       // Update ride status to "driver_rejected"
       await _database.ref('active_rides/$rideId').update({
@@ -67,7 +77,7 @@ class RideManagementService {
         'rejectedDriver': _driverId,
       });
 
-      print('RideManagementService: Ride rejected');
+      _logger.i('Ride rejected: $rideId');
 
       // Update driver status back to "available"
       await _database.ref('drivers/$_driverId').update({
@@ -75,7 +85,7 @@ class RideManagementService {
         'updatedAt': DateTime.now().toIso8601String(),
       });
 
-      print('RideManagementService: Driver status updated to available');
+      _logger.i('Driver status updated to available');
     } catch (e) {
       if (e is RideManagementException) {
         rethrow;
@@ -84,19 +94,29 @@ class RideManagementService {
     }
   }
 
-  /// Get ride details by rideId
+  /// Get ride details by rideId from the database
+  /// Queries active_rides/{rideId} and returns the ride data
   Future<Map<String, dynamic>?> getRideDetails(String rideId) async {
     try {
+      _logger.i('Fetching ride details for rideId: $rideId');
+
       final snapshot = await _database.ref('active_rides/$rideId').get();
 
       if (snapshot.exists) {
-        return Map<String, dynamic>.from(
+        final rideData = Map<String, dynamic>.from(
           snapshot.value as Map<dynamic, dynamic>,
         );
+
+        _logger.i('Ride details fetched successfully for rideId: $rideId');
+        _logger.d('Ride data: $rideData');
+
+        return rideData;
       }
 
+      _logger.w('Ride not found for rideId: $rideId');
       return null;
     } catch (e) {
+      _logger.e('Error fetching ride details: $e');
       throw RideManagementException(
         'Failed to get ride details: ${e.toString()}',
       );
@@ -106,7 +126,7 @@ class RideManagementService {
   /// Cancel a ride (for driver who has accepted)
   Future<void> cancelRide(String rideId, String reason) async {
     try {
-      print('RideManagementService: Cancelling ride: $rideId');
+      _logger.i('Cancelling ride: $rideId, reason: $reason');
 
       // Update ride status to "cancelled"
       await _database.ref('active_rides/$rideId').update({
@@ -116,13 +136,15 @@ class RideManagementService {
         'cancelReason': reason,
       });
 
-      print('RideManagementService: Ride cancelled');
+      _logger.i('Ride cancelled: $rideId');
 
       // Update driver status back to "available"
       await _database.ref('drivers/$_driverId').update({
         'status': 'available',
         'updatedAt': DateTime.now().toIso8601String(),
       });
+
+      _logger.i('Driver status updated to available');
     } catch (e) {
       if (e is RideManagementException) {
         rethrow;

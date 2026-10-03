@@ -10,6 +10,7 @@ import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
 import 'package:driver_app/rides/ride_details_page.dart';
 import 'package:driver_app/services/location_service.dart';
 import 'package:driver_app/services/polyline_service.dart';
+import 'package:driver_app/services/ride_management_service.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
 import 'package:ulendo_core/messaging/fcm_service.dart';
 
@@ -90,6 +91,7 @@ class _DriverShellState extends State<DriverShell> {
               locationService: LocationService(),
               notificationHubBloc: _notificationHubBloc,
               polylineService: PolylineService(),
+              rideManagementService: RideManagementService(),
             );
           },
         ),

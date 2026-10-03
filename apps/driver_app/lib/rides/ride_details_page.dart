@@ -251,7 +251,7 @@ class RideDetailsPage extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Distance: ${notif.distanceToPickup?.toStringAsFixed(2) ?? 'N/A'} km',
+                                        'Lat: ${notif.dropoffLat?.toStringAsFixed(4) ?? 'N/A'}, Lng: ${notif.dropoffLng?.toStringAsFixed(4) ?? 'N/A'}',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,
