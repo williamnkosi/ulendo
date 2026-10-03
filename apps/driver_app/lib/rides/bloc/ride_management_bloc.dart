@@ -338,7 +338,9 @@ class RideManagementBloc
         );
         if (polylines.isNotEmpty) {
           final poly = polylines.first;
-          _logger.i('First polyline: id=${poly.polylineId.value}, points=${poly.points.length}, color=${poly.color}, width=${poly.width}');
+          _logger.i(
+            'First polyline: id=${poly.polylineId.value}, points=${poly.points.length}, color=${poly.color}, width=${poly.width}',
+          );
         }
       } catch (polylineError) {
         _logger.e('Failed to fetch polylines: $polylineError');
@@ -351,7 +353,9 @@ class RideManagementBloc
         'Emitting EnRouteToPickup state with ${polylines.length} polylines',
       );
       if (polylines.isNotEmpty) {
-        _logger.i('🎯 EMITTING WITH POLYLINES - Details: ${polylines.map((p) => 'id=${p.polylineId.value}, points=${p.points.length}').join(', ')}');
+        _logger.i(
+          '🎯 EMITTING WITH POLYLINES - Details: ${polylines.map((p) => 'id=${p.polylineId.value}, points=${p.points.length}').join(', ')}',
+        );
       } else {
         _logger.w('⚠️ EMITTING WITHOUT POLYLINES - polylines is EMPTY');
       }

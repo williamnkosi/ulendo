@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +38,9 @@ class _RouteMapState extends State<RouteMap> {
   void initState() {
     super.initState();
     final bloc = context.read<RideManagementBloc>();
-    _logger.i('Initializing RouteMap - Current bloc state: ${bloc.state.runtimeType}');
+    _logger.i(
+      'Initializing RouteMap - Current bloc state: ${bloc.state.runtimeType}',
+    );
     _updateMapForState(bloc.state);
   }
 
@@ -90,6 +93,17 @@ class _RouteMapState extends State<RouteMap> {
     return BlocBuilder<RideManagementBloc, RideManagementState>(
       builder: (context, state) {
         if (state is EnRouteToPickup) {
+          // Calculate distance to pickup
+          final distance = _calculateDistance(
+            state.currentLocation.latitude,
+            state.currentLocation.longitude,
+            state.rideRequest.pickup.lat,
+            state.rideRequest.pickup.lng,
+          );
+
+          // Enable button when within 100 meters
+          final isAtPickup = distance <= 0.1; // 0.1 km = 100 meters
+
           return Card(
             elevation: 4,
             child: Padding(
@@ -116,13 +130,18 @@ class _RouteMapState extends State<RouteMap> {
                           children: [
                             const Text(
                               'Pickup Location',
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
                             ),
                             Text(
                               state.rideRequest.pickup.address,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.w500),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
@@ -130,9 +149,56 @@ class _RouteMapState extends State<RouteMap> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    'Polylines: ${_polylines.length} | Points: ${_polylines.isNotEmpty ? _polylines.first.points.length : 0}',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Distance: ${distance.toStringAsFixed(2)} km',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isAtPickup ? Colors.green : Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Polylines: ${_polylines.length}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isAtPickup
+                          ? () {
+                              _logger.i('Driver arrived at pickup');
+                              context.read<RideManagementBloc>().add(
+                                    const ArrivedAtPickupEvent(),
+                                  );
+                            }
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isAtPickup
+                            ? Colors.green
+                            : Colors.grey.shade300,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        isAtPickup
+                            ? 'Arrived at Pickup ✓'
+                            : 'En Route (${distance.toStringAsFixed(2)} km away)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isAtPickup ? Colors.white : Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -144,9 +210,31 @@ class _RouteMapState extends State<RouteMap> {
     );
   }
 
+  /// Calculate distance between two points in kilometers using Haversine formula
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const p = 0.017453292519943295; // π/180
+    return 12742 *
+        asin(
+          sqrt(
+            sin((lat2 - lat1) * p / 2) * sin((lat2 - lat1) * p / 2) +
+                cos(lat1 * p) *
+                    cos(lat2 * p) *
+                    sin((lon2 - lon1) * p / 2) *
+                    sin((lon2 - lon1) * p / 2),
+          ),
+        );
+  }
+
   void _updateMapForState(RideManagementState state) {
     if (state is! EnRouteToPickup) {
-      _logger.d('State is not EnRouteToPickup (${state.runtimeType}), clearing map');
+      _logger.d(
+        'State is not EnRouteToPickup (${state.runtimeType}), clearing map',
+      );
       return;
     }
 
@@ -202,7 +290,7 @@ class _RouteMapState extends State<RouteMap> {
       _markers = newMarkers;
       _currentCameraPosition = CameraPosition(
         target: LatLng(driverLocation.latitude, driverLocation.longitude),
-        zoom: 14.0,
+        zoom: 17.0,
       );
       _logger.i(
         'setState: Updated markers (${_markers.length}), polylines (${_polylines.length}), camera at (${driverLocation.latitude}, ${driverLocation.longitude})',

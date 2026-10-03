@@ -92,7 +92,9 @@ class PolylineService {
         _logger.d(
           'Last point: ${decodedPoints.isNotEmpty ? decodedPoints.last : 'N/A'}',
         );
-        _logger.i('🎯 FINAL POLYLINE SET CONTENT: {polyline with ${decodedPoints.length} points}');
+        _logger.i(
+          '🎯 FINAL POLYLINE SET CONTENT: {polyline with ${decodedPoints.length} points}',
+        );
 
         return {polyline};
       } else {
