@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driver_app/home/widgets/live_location_map.dart';
-import 'package:driver_app/home/widgets/route_map.dart';
+import 'package:driver_app/home/widgets/generic_route_map.dart';
 import 'package:driver_app/home/widgets/waiting_screen.dart';
 import 'package:driver_app/home/widgets/location_tracking_toggle.dart';
 import 'package:driver_app/home/widgets/driver_offline_screen.dart';
@@ -55,13 +55,43 @@ class _DriverHomePageState extends State<DriverHomePage> {
                   if (rideState is Offline) {
                     return const DriverOfflineScreen();
                   }
-                  // Show dedicated route map for pickup navigation
+                  // Show generic route map for pickup navigation
                   if (rideState is EnRouteToPickup) {
-                    return const RouteMap();
+                    return GenericRouteMap(
+                      destinationAddress: rideState.rideRequest.pickup.address,
+                      destinationLat: rideState.rideRequest.pickup.lat,
+                      destinationLng: rideState.rideRequest.pickup.lng,
+                      currentLocation: rideState.currentLocation,
+                      polylines: rideState.polylines,
+                      buttonLabel: 'Arrived at Pickup ✓',
+                      mapTitle: 'En Route to Pickup',
+                      onArrived: () {
+                        context.read<RideManagementBloc>().add(
+                          const ArrivedAtPickupEvent(),
+                        );
+                      },
+                    );
                   }
                   // Show waiting screen for passenger boarding
                   if (rideState is Waiting) {
                     return const WaitingScreen();
+                  }
+                  // Show generic route map for destination navigation
+                  if (rideState is EnRouteToDestination) {
+                    return GenericRouteMap(
+                      destinationAddress: rideState.rideRequest.dropoff.address,
+                      destinationLat: rideState.rideRequest.dropoff.lat,
+                      destinationLng: rideState.rideRequest.dropoff.lng,
+                      currentLocation: rideState.currentLocation,
+                      polylines: rideState.polylines,
+                      buttonLabel: 'Completed Ride ✓',
+                      mapTitle: 'En Route to Destination',
+                      onArrived: () {
+                        context.read<RideManagementBloc>().add(
+                          const CompleteRideEvent(),
+                        );
+                      },
+                    );
                   }
                   // Show general location map for Online and other states
                   return const LiveLocationMap();
