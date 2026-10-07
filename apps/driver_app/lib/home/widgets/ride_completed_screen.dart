@@ -31,7 +31,7 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
   void initState() {
     super.initState();
     _logger.i('Initializing RideCompletedScreen');
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -56,9 +56,7 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
       builder: (context, state) {
         if (state is! RideCompleted) {
           _logger.w('RideCompletedScreen called with non-RideCompleted state');
-          return const Scaffold(
-            body: Center(child: Text('Invalid state')),
-          );
+          return const Scaffold(body: Center(child: Text('Invalid state')));
         }
 
         return Scaffold(
@@ -91,17 +89,17 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
                     // Completion message
                     Text(
                       'Ride Completed!',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Thank you for the ride',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
+                      style: Theme.of(context).textTheme.bodyLarge
+                          ?.copyWith(color: Colors.grey.shade600),
                     ),
                     const SizedBox(height: 32),
 
@@ -159,6 +157,25 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
                         ),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () => _goOffline(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: const BorderSide(color: Colors.red),
+                        ),
+                        child: const Text(
+                          'Go Offline',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -192,17 +209,15 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
                 children: [
                   Text(
                     'Pickup',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: Colors.grey.shade600),
                   ),
                   Text(
                     state.rideRequest.pickup.address,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -231,17 +246,15 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
                 children: [
                   Text(
                     'Dropoff',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: Colors.grey.shade600),
                   ),
                   Text(
                     state.rideRequest.dropoff.address,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -261,11 +274,7 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
           'Ride ID',
           state.rideId.substring(0, 8).toUpperCase(),
         ),
-        _detailItem(
-          context,
-          'Status',
-          'Completed',
-        ),
+        _detailItem(context, 'Status', 'Completed'),
         _detailItem(
           context,
           'Earnings',
@@ -280,16 +289,14 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey.shade600,
-          ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Colors.grey.shade600),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -303,8 +310,13 @@ class _RideCompletedScreenState extends State<RideCompletedScreen>
   void _ratePassenger(BuildContext context) {
     _logger.i('User tapped "Rate Passenger" button');
     // TODO: Implement passenger rating dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Rating feature coming soon')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Rating feature coming soon')));
+  }
+
+  void _goOffline(BuildContext context) {
+    _logger.i('User tapped "Go Offline" button');
+    context.read<RideManagementBloc>().add(const GoOfflineEvent());
   }
 }
