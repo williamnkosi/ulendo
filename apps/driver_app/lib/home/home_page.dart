@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driver_app/home/widgets/live_location_map.dart';
 import 'package:driver_app/home/widgets/generic_route_map.dart';
 import 'package:driver_app/home/widgets/waiting_screen.dart';
+import 'package:driver_app/home/widgets/ride_completed_screen.dart';
 import 'package:driver_app/home/widgets/location_tracking_toggle.dart';
 import 'package:driver_app/home/widgets/driver_offline_screen.dart';
 import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
@@ -92,6 +93,10 @@ class _DriverHomePageState extends State<DriverHomePage> {
                         );
                       },
                     );
+                  }
+                  // Show ride completed summary screen
+                  if (rideState is RideCompleted) {
+                    return const RideCompletedScreen();
                   }
                   // Show general location map for Online and other states
                   return const LiveLocationMap();

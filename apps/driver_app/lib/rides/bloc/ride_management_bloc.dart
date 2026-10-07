@@ -432,9 +432,13 @@ class RideManagementBloc
           dropoffLng: dropoffLng,
         );
 
-        _logger.i('💡 Emitting EnRouteToDestination state with ${polylines.length} polylines');
+        _logger.i(
+          '💡 Emitting EnRouteToDestination state with ${polylines.length} polylines',
+        );
       } else {
-        _logger.w('⚠️ Current location is null, cannot calculate polylines to destination');
+        _logger.w(
+          '⚠️ Current location is null, cannot calculate polylines to destination',
+        );
       }
 
       emit(
@@ -507,9 +511,6 @@ class RideManagementBloc
           rideId: completedRideId,
         ),
       );
-
-      // Transition back to online after completion
-      emit(Online(currentLocation: _currentLocation));
     } catch (e) {
       emit(RideManagementError('Failed to complete ride: ${e.toString()}'));
     }
