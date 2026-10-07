@@ -152,4 +152,26 @@ class RideManagementService {
       throw RideManagementException('Failed to cancel ride: ${e.toString()}');
     }
   }
+
+  /// Complete a ride by updating its status to "completed"
+  /// Also updates the driver status back to "available"
+  Future<void> completeRide(String rideId) async {
+    try {
+      _logger.i('Completing ride: $rideId');
+
+      // Update ride status to "completed"
+      await _database.ref('active_rides/$rideId').update({
+        'status': 'completed',
+        'completedAt': DateTime.now().toIso8601String(),
+        'completedBy': _driverId,
+      });
+
+      _logger.i('Ride completed: $rideId');
+    } catch (e) {
+      if (e is RideManagementException) {
+        rethrow;
+      }
+      throw RideManagementException('Failed to complete ride: ${e.toString()}');
+    }
+  }
 }
