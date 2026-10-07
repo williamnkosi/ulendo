@@ -500,6 +500,10 @@ class RideManagementBloc
       final completedRide = _currentRide!;
       final completedRideId = _currentRideId!;
 
+      // Update ride status to completed in the database
+      await _rideManagementService.completeRide(completedRideId);
+      _logger.i('Ride completion saved to database: $completedRideId');
+
       // Clear current ride data
       _currentRide = null;
       _currentRideId = null;
