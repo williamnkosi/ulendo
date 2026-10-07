@@ -12,6 +12,7 @@ import { onUserCreatedFunction } from "./user/on_user_created_function";
 import { requestRideFunction } from "./rides/request_ride_function";
 // eslint-disable-next-line max-len
 import { findAvailableDriverFunction } from "./rides/find_available_driver_function";
+import { onRideCompletedFunction } from "./rides/on_ride_completed";
 // import {onRequest} from "firebase-functions/https";
 // import * as logger from "firebase-functions/logger";
 
@@ -34,6 +35,7 @@ export {
   onUserCreatedFunction,
   requestRideFunction,
   findAvailableDriverFunction,
+  onRideCompletedFunction,
 };
 
 // export const helloWorld = onRequest((request, response) => {
