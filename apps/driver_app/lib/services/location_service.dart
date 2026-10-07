@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:ulendo_models/models/location_data.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 /// Service to handle real-time location tracking and Firebase Realtime Database uploads with GeoFire
@@ -21,7 +20,6 @@ class LocationService {
 
   // Configuration
   static const Duration _defaultUpdateInterval = Duration(seconds: 10);
-  static const String _geoFirePath = 'drivers'; // GeoFire collection path
 
   LocationService() {
     _driverId = _auth.currentUser?.uid ?? '';
@@ -32,19 +30,14 @@ class LocationService {
     _driverRef = _database.ref('drivers/$_driverId');
   }
 
-  /// Initialize location service and GeoFire
+  /// Initialize location service
   Future<void> initialize() async {
     try {
-      print('Initializing LocationService with GeoFire...');
+      print('Initializing LocationService...');
       // Check location permissions
       print('Checking location permissions...');
       await _checkLocationPermissions();
       print('Location permissions granted');
-
-      // Initialize GeoFire with the drivers collection path
-      print('Initializing GeoFire...');
-      await Geofire.initialize(_geoFirePath);
-      print('GeoFire initialized successfully');
 
       // Test database connection
       print('Testing database connection...');
@@ -103,46 +96,46 @@ class LocationService {
     }
   }
 
-  /// Stop location streaming and remove from GeoFire
+  /// Stop location streaming
   Future<void> stopLocationStreaming() async {
     try {
       // Cancel the timer
       _locationUpdateTimer?.cancel();
       _locationUpdateTimer = null;
 
-      // Remove from GeoFire
-      await Geofire.removeLocation(_driverId);
+      // Remove driver record
+      await _driverRef.remove();
 
-      // Update driver status to offline
-      await _driverRef.update({
-        'status': 'offline',
-        'timestamp': ServerValue.timestamp,
-      });
-
-      print('Location streaming stopped and driver removed from GeoFire');
+      print('Location streaming stopped');
     } catch (e) {
       throw LocationServiceException('Failed to stop location streaming: $e');
     }
   }
 
-  /// Upload location data to Firebase Realtime Database using GeoFire
-  /// GeoFire stores location with geohashing for efficient proximity queries
+  /// Upload location data to Firebase Realtime Database
+  /// Also includes the driver's FCM token for push notifications
+  /// Throws if FCM token is not available
   Future<void> _uploadLocationToDatabase(LocationData locationData) async {
     try {
-      // Use GeoFire to set location (handles geohashing internally)
-      await Geofire.setLocation(
-        _driverId,
-        locationData.latitude,
-        locationData.longitude,
-      );
+      // Get current FCM token
+      final fcmToken = await FirebaseMessaging.instance.getToken();
 
-      // Also store driver metadata separately for queries
-      await _driverRef.update({
+      if (fcmToken == null || fcmToken.isEmpty) {
+        throw LocationServiceException(
+          'FCM token not available. Driver cannot receive ride notifications.',
+        );
+      }
+
+      // Store driver location data with FCM token
+      final updateData = {
         'latitude': locationData.latitude,
         'longitude': locationData.longitude,
         'status': 'available',
+        'fcmToken': fcmToken,
         'timestamp': ServerValue.timestamp,
-      });
+      };
+
+      await _driverRef.update(updateData);
 
       print(
         'Location uploaded successfully: ${locationData.latitude}, ${locationData.longitude}',

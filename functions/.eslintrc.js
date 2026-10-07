@@ -30,5 +30,7 @@ module.exports = {
     // eslint-disable-next-line quote-props
     indent: ["error", 2],
     "object-curly-spacing": ["error", "always"],
+    "require-jsdoc": 0,
+    "jsdoc/require-jsdoc": 0,
   },
 };

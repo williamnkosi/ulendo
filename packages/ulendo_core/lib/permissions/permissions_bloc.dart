@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../services/permissions_service.dart';
+import '../messaging/fcm_service.dart';
 
 part 'permissions_event.dart';
 part 'permissions_state.dart';
@@ -51,10 +53,25 @@ class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
       );
 
       if (denied.isEmpty) {
+        // Initialize FCM after all permissions are granted
+        await _initializeFCM();
         emit(const PermissionsDriverGranted());
       }
     } catch (e) {
       emit(PermissionsError(message: 'Failed to request permissions: $e'));
+    }
+  }
+
+  /// Initialize Firebase Cloud Messaging
+  Future<void> _initializeFCM() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final fcmService = FCMService();
+        await fcmService.initialize(user.uid);
+      }
+    } catch (e) {
+      print('Error initializing FCM: $e');
     }
   }
 

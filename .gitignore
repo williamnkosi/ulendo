@@ -39,6 +39,11 @@ functions/.runtimeconfig.json
 *.secret.json
 service-account*.json
 
+# Environment variables - SECURITY CRITICAL
+.env
+.env.local
+.env.*.local
+
 # Optional: Un-comment if you generate Firebase credentials dynamically in CI/CD
 # **/google-services.json
 # **/GoogleService-Info.plist

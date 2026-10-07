@@ -1,22 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:logger/logger.dart';
 import 'package:driver_app/account/account_page.dart';
 import 'package:driver_app/earnings/earnings_page.dart';
 import 'package:driver_app/home/home_page.dart';
-import 'package:driver_app/location/location_tracking_bloc.dart';
+import 'package:driver_app/notifications/bloc/notification_hub_bloc.dart';
+import 'package:driver_app/rides/bloc/ride_management_bloc.dart';
+import 'package:driver_app/rides/ride_details_page.dart';
 import 'package:driver_app/services/location_service.dart';
+import 'package:driver_app/services/polyline_service.dart';
+import 'package:driver_app/services/ride_management_service.dart';
 import 'package:ulendo_core/permissions/permissions_bloc.dart';
+import 'package:ulendo_core/messaging/fcm_service.dart';
+
+final _logger = Logger(
+  printer: PrefixPrinter(
+    PrettyPrinter(methodCount: 0),
+    info: '[DriverShell]',
+    debug: '[DriverShell]',
+    warning: '[DriverShell]',
+    error: '[DriverShell]',
+  ),
+);
 
 /// The root navigation shell that provides bottom tab navigation.
 class DriverShell extends StatefulWidget {
   const DriverShell({super.key});
 
   @override
-  State<DriverShell> createState() => _DriverShellState();
+  State<DriverShell> createState() {
+    _logger.d('DriverShell.createState() called');
+    return _DriverShellState();
+  }
 }
 
 class _DriverShellState extends State<DriverShell> {
   int _selectedIndex = 0;
+  late NotificationHubBloc _notificationHubBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _logger.d('_DriverShellState.initState() called');
+    // Create the bloc ONCE in initState, not in build()
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    _logger.d('Creating NotificationHubBloc with userId: $userId');
+    _notificationHubBloc = NotificationHubBloc(fcmService: FCMService());
+    _logger.d('Adding InitializeNotificationHubEvent');
+    _notificationHubBloc.add(
+      InitializeNotificationHubEvent(driverId: userId ?? ''),
+    );
+  }
+
+  @override
+  void dispose() {
+    _logger.d('Disposing NotificationHubBloc');
+    _notificationHubBloc.close();
+    super.dispose();
+  }
 
   Widget _generatePage() {
     switch (_selectedIndex) {
@@ -35,30 +77,79 @@ class _DriverShellState extends State<DriverShell> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<PermissionsBloc>(
-          create: (context) =>
-              PermissionsBloc()..add(const RequestDriverPermissionsEvent()),
+          create: (context) {
+            _logger.d('Creating PermissionsBloc');
+            return PermissionsBloc()
+              ..add(const RequestDriverPermissionsEvent());
+          },
         ),
-        BlocProvider<LocationTrackingBloc>(
-          create: (context) =>
-              LocationTrackingBloc(locationService: LocationService()),
+        BlocProvider<NotificationHubBloc>.value(value: _notificationHubBloc),
+        BlocProvider<RideManagementBloc>(
+          create: (context) {
+            _logger.d('Creating RideManagementBloc');
+            return RideManagementBloc(
+              locationService: LocationService(),
+              notificationHubBloc: _notificationHubBloc,
+              polylineService: PolylineService(),
+              rideManagementService: RideManagementService(),
+            );
+          },
         ),
       ],
-      child: Scaffold(
-        body: _generatePage(),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (value) => setState(() => _selectedIndex = value),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.attach_money),
-              label: 'Earnings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle),
-              label: 'Account',
-            ),
-          ],
+      child: BlocListener<RideManagementBloc, RideManagementState>(
+        listenWhen: (previous, current) {
+          final isTransitionToOffered = current is RideOffered;
+          _logger.d(
+            'BlocListener: previous=$previous, current=$current, isTransitionToOffered=$isTransitionToOffered',
+          );
+          return isTransitionToOffered;
+        },
+        listener: (context, state) {
+          _logger.i('Listener called with state: $state');
+          if (state is RideOffered) {
+            _logger.i('RideOffered state detected, navigating to ride details');
+            _logger.d('Context: $context');
+            _logger.d('Navigator state: ${Navigator.of(context).mounted}');
+
+            Future.delayed(const Duration(milliseconds: 100), () {
+              try {
+                _logger.i('About to push RideDetailsPage');
+                final rideManagementBloc = BlocProvider.of<RideManagementBloc>(
+                  context,
+                );
+                final result = Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        BlocProvider<RideManagementBloc>.value(
+                          value: rideManagementBloc,
+                          child: const RideDetailsPage(),
+                        ),
+                  ),
+                );
+                _logger.i('Navigation push result: $result');
+              } catch (e, stackTrace) {
+                _logger.e('Navigation error: $e\nStackTrace: $stackTrace');
+              }
+            });
+          }
+        },
+        child: Scaffold(
+          body: _generatePage(),
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: (value) => setState(() => _selectedIndex = value),
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.attach_money),
+                label: 'Earnings',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.account_circle),
+                label: 'Account',
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -18,17 +18,19 @@
       "console": "integrated"
     },
     {
-      "name": "Rider App (Select Device)",
+      "name": "Rider App IOS",
       "type": "dart",
       "request": "launch",
       "program": "apps/rider_app/lib/main.dart",
+      "args": ["-d", "iPhone 16e"],
       "console": "integrated"
     },
     {
-      "name": "Driver App (Select Device)",
+      "name": "Driver App IOS",
       "type": "dart",
       "request": "launch",
       "program": "apps/driver_app/lib/main.dart",
+      "args": ["-d", "iPhone 16e"],
       "console": "integrated"
     }
   ]

@@ -1,6 +1,14 @@
 {
   /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
   "rules": {
+    "active_rides": {
+      "$rideId": {
+        // Allow authenticated drivers to update rides
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['rideId', 'userId', 'status', 'pickup', 'dropoff'])"
+      }
+    },
     "drivers": {
       "$driverId": {
         // Allow drivers to read/write their own data
