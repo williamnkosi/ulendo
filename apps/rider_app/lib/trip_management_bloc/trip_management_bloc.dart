@@ -1,12 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
+import 'trip_management_repository.dart';
 import 'trip_management_event.dart';
 import 'trip_management_state.dart';
 
 /// BLoC for managing the entire rider trip lifecycle
 /// Handles rider state transitions from initial → searching → accepted → in progress → completed
 class TripManagementBloc extends Bloc<TripManagementEvent, TripManagementState> {
+  final TripManagementRepository _repository;
   final Logger _logger = Logger(
     printer: PrefixPrinter(
       PrettyPrinter(methodCount: 0),
@@ -17,7 +19,9 @@ class TripManagementBloc extends Bloc<TripManagementEvent, TripManagementState> 
     ),
   );
 
-  TripManagementBloc() : super(const TripInitial()) {
+  TripManagementBloc({required TripManagementRepository repository})
+      : _repository = repository,
+        super(const TripInitial()) {
     on<RequestTripEvent>(_onRequestTrip);
     on<TripAcceptedEvent>(_onTripAccepted);
     on<DriverArrivingAtPickupEvent>(_onDriverArrivingAtPickup);
@@ -37,9 +41,15 @@ class TripManagementBloc extends Bloc<TripManagementEvent, TripManagementState> 
     RequestTripEvent event,
     Emitter<TripManagementState> emit,
   ) async {
+    emit(const TripSearching());
     try {
-      _logger.i('Requesting trip');
-      emit(const TripSearching());
+      _logger.i('Requesting trip from ${event.pickup.address} to ${event.dropoff.address}');
+      await _repository.requestTrip(
+        pickup: event.pickup,
+        dropoff: event.dropoff,
+      );
+      _logger.i('Trip requested successfully');
+      // Stay in searching state while waiting for driver acceptance
     } catch (e) {
       _logger.e('Error requesting trip', error: e);
       emit(TripError(message: e.toString()));

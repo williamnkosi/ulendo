@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ulendo_models/models/location.dart';
 
 /// Base class for all TripManagement events
 abstract class TripManagementEvent extends Equatable {
@@ -10,7 +11,16 @@ abstract class TripManagementEvent extends Equatable {
 
 /// Request a new trip (ride)
 class RequestTripEvent extends TripManagementEvent {
-  const RequestTripEvent();
+  final Location pickup;
+  final Location dropoff;
+
+  const RequestTripEvent({
+    required this.pickup,
+    required this.dropoff,
+  });
+
+  @override
+  List<Object?> get props => [pickup, dropoff];
 }
 
 /// A driver has accepted the trip
