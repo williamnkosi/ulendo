@@ -6,9 +6,7 @@ import 'package:google_places_autocomplete_text_field/google_places_autocomplete
 import 'package:logging/logging.dart';
 import 'package:ulendo_models/ulendo_models.dart';
 
-import '../ride/ride_bloc.dart';
-import '../ride/ride_event.dart';
-import '../ride/ride_state.dart';
+import '../trip_management_bloc/index.dart';
 
 class RideRequestPage extends StatefulWidget {
   const RideRequestPage({super.key});
@@ -144,28 +142,28 @@ class _RideRequestPageState extends State<RideRequestPage> {
               const SizedBox(height: 24),
 
               // Search/Start Button
-              BlocListener<RideBloc, RideState>(
+              BlocListener<TripManagementBloc, TripManagementState>(
                 listener: (context, state) {
-                  if (state is RideError) {
+                  if (state is TripError) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Error: ${state.message}'),
                         backgroundColor: Colors.red,
                       ),
                     );
-                  } else if (state is RideRequested) {
-                    logger.info('Ride requested successfully');
+                  } else if (state is TripSearching) {
+                    logger.info('Trip request submitted');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Ride request submitted!'),
+                        content: Text('Searching for drivers...'),
                         backgroundColor: Colors.green,
                       ),
                     );
                   }
                 },
-                child: BlocBuilder<RideBloc, RideState>(
+                child: BlocBuilder<TripManagementBloc, TripManagementState>(
                   builder: (context, state) {
-                    final isLoading = state is RideLoading;
+                    final isLoading = state is TripSearching;
 
                     return ElevatedButton(
                       onPressed: isLoading
@@ -191,7 +189,7 @@ class _RideRequestPageState extends State<RideRequestPage> {
 
                               if (_formKey.currentState!.validate()) {
                                 logger.info(
-                                  'Form is valid, dispatching RequestRideEvent',
+                                  'Form is valid, dispatching RequestTripEvent',
                                 );
 
                                 final pickupLocation = Location(
@@ -206,8 +204,8 @@ class _RideRequestPageState extends State<RideRequestPage> {
                                   address: _dropOffPrediction!.description!,
                                 );
 
-                                context.read<RideBloc>().add(
-                                  RequestRideEvent(
+                                context.read<TripManagementBloc>().add(
+                                  RequestTripEvent(
                                     pickup: pickupLocation,
                                     dropoff: dropoffLocation,
                                   ),
