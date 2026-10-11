@@ -1,5 +1,6 @@
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logger/logger.dart';
 
 /// Enum for ride-sharing specific permissions
 enum RideSharingPermission {
@@ -70,6 +71,15 @@ extension _PermissionMapping on RideSharingPermission {
 /// PermissionsService handles all permission requests for ride-sharing features
 class PermissionsService {
   static final PermissionsService _instance = PermissionsService._internal();
+  static final Logger _logger = Logger(
+    printer: PrefixPrinter(
+      PrettyPrinter(methodCount: 0),
+      info: '[PermissionsService]',
+      error: '[PermissionsService]',
+      warning: '[PermissionsService]',
+      debug: '[PermissionsService]',
+    ),
+  );
 
   factory PermissionsService() {
     return _instance;
@@ -81,13 +91,22 @@ class PermissionsService {
   Future<PermissionStatus> getPermissionStatus(
     RideSharingPermission permission,
   ) async {
-    return permission.platformPermission.status;
+    _logger.d('Checking status for permission: ${permission.displayName}');
+    final status = await permission.platformPermission.status;
+    _logger.d('Permission ${permission.displayName} status: $status');
+    return status;
   }
 
   /// Request a single permission
   /// Returns true if granted, false otherwise
   Future<bool> requestPermission(RideSharingPermission permission) async {
+    _logger.i('Requesting permission: ${permission.displayName}');
     final status = await permission.platformPermission.request();
+    if (status.isGranted) {
+      _logger.i('Permission granted: ${permission.displayName}');
+    } else {
+      _logger.w('Permission denied: ${permission.displayName} (status: $status)');
+    }
     return status.isGranted;
   }
 
@@ -96,11 +115,13 @@ class PermissionsService {
   Future<Map<RideSharingPermission, bool>> requestPermissions(
     List<RideSharingPermission> permissions,
   ) async {
+    _logger.i('Requesting ${permissions.length} permissions');
     final result = <RideSharingPermission, bool>{};
 
     for (final permission in permissions) {
       final status = await permission.platformPermission.request();
       result[permission] = status.isGranted;
+      _logger.d('${permission.displayName}: ${status.isGranted ? 'GRANTED' : 'DENIED'}');
     }
 
     return result;
@@ -122,39 +143,54 @@ class PermissionsService {
   /// Request driver-specific permissions
   /// Returns true if all were granted
   Future<bool> requestDriverPermissions() async {
+    _logger.i('Requesting driver-specific permissions');
     final results = await requestPermissions(driverPermissions);
-    return results.values.every((granted) => granted);
+    final allGranted = results.values.every((granted) => granted);
+    _logger.i('Driver permissions request completed: ${allGranted ? 'ALL GRANTED' : 'SOME DENIED'}');
+    return allGranted;
   }
 
   /// Request rider-specific permissions
   /// Returns true if all were granted
   Future<bool> requestRiderPermissions() async {
+    _logger.i('Requesting rider-specific permissions');
     final results = await requestPermissions(riderPermissions);
-    return results.values.every((granted) => granted);
+    final allGranted = results.values.every((granted) => granted);
+    _logger.i('Rider permissions request completed: ${allGranted ? 'ALL GRANTED' : 'SOME DENIED'}');
+    return allGranted;
   }
 
   /// Check if all driver permissions are granted
   Future<bool> areDriverPermissionsGranted() async {
+    _logger.d('Checking if all driver permissions are granted');
     final statuses = <bool>[];
     for (final permission in driverPermissions) {
       final status = await getPermissionStatus(permission);
       statuses.add(status.isGranted);
     }
-    return statuses.every((granted) => granted);
+    final allGranted = statuses.every((granted) => granted);
+    _logger.d('Driver permissions check result: $allGranted');
+    return allGranted;
   }
 
   /// Check if all rider permissions are granted
   Future<bool> areRiderPermissionsGranted() async {
+    _logger.d('Checking if all rider permissions are granted');
     final statuses = <bool>[];
     for (final permission in riderPermissions) {
       final status = await getPermissionStatus(permission);
       statuses.add(status.isGranted);
     }
-    return statuses.every((granted) => granted);
+    final allGranted = statuses.every((granted) => granted);
+    _logger.d('Rider permissions check result: $allGranted');
+    return allGranted;
   }
 
   /// Open app settings to manually grant denied permissions
   Future<bool> openAppSettings() async {
-    return openAppSettings();
+    _logger.i('Opening app settings for manual permission management');
+    final opened = await openAppSettings();
+    _logger.d('App settings opened: $opened');
+    return opened;
   }
 }
