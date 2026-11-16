@@ -2,12 +2,23 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:logger/logger.dart';
 
 import '../services/permissions_service.dart';
 import '../messaging/fcm_service.dart';
 
 part 'permissions_event.dart';
 part 'permissions_state.dart';
+
+final _logger = Logger(
+  printer: PrefixPrinter(
+    PrettyPrinter(methodCount: 0),
+    info: '[PermissionsBloc]',
+    debug: '[PermissionsBloc]',
+    warning: '[PermissionsBloc]',
+    error: '[PermissionsBloc]',
+  ),
+);
 
 /// PermissionsBloc handles permission requests and status tracking for ride-sharing
 class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
@@ -16,6 +27,7 @@ class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
   PermissionsBloc({PermissionsService? permissionsService})
     : _permissionsService = permissionsService ?? PermissionsService(),
       super(const PermissionsInitial()) {
+    _logger.i('PermissionsBloc created');
     on<RequestDriverPermissionsEvent>(_onRequestDriverPermissions);
     on<RequestRiderPermissionsEvent>(_onRequestRiderPermissions);
     on<CheckPermissionStatusEvent>(_onCheckPermissionStatus);
@@ -30,11 +42,14 @@ class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
     Emitter<PermissionsState> emit,
   ) async {
     try {
+      _logger.i('_onRequestDriverPermissions called');
       emit(const PermissionsLoading());
 
       final results = await _permissionsService.requestPermissions(
         PermissionsService.driverPermissions,
       );
+
+      _logger.d('Driver permissions results: $results');
 
       final granted = results.entries
           .where((e) => e.value)
@@ -58,6 +73,7 @@ class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
         emit(const PermissionsDriverGranted());
       }
     } catch (e) {
+      _logger.e('Error in _onRequestDriverPermissions: $e');
       emit(PermissionsError(message: 'Failed to request permissions: $e'));
     }
   }
@@ -81,11 +97,18 @@ class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
     Emitter<PermissionsState> emit,
   ) async {
     try {
+      _logger.i('_onRequestRiderPermissions called');
       emit(const PermissionsLoading());
+
+      _logger.d(
+        'Requesting rider permissions: ${PermissionsService.riderPermissions.map((p) => p.name).toList()}',
+      );
 
       final results = await _permissionsService.requestPermissions(
         PermissionsService.riderPermissions,
       );
+
+      _logger.d('Rider permissions results: $results');
 
       final granted = results.entries
           .where((e) => e.value)
@@ -96,6 +119,9 @@ class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
           .map((e) => e.key)
           .toList();
 
+      _logger.d('Granted: ${granted.map((p) => p.name).toList()}');
+      _logger.d('Denied: ${denied.map((p) => p.name).toList()}');
+
       emit(
         PermissionsSuccess(
           grantedPermissions: granted,
@@ -104,9 +130,11 @@ class PermissionsBloc extends Bloc<PermissionsEvent, PermissionsState> {
       );
 
       if (denied.isEmpty) {
+        _logger.i('All rider permissions granted');
         emit(const PermissionsRiderGranted());
       }
     } catch (e) {
+      _logger.e('Error in _onRequestRiderPermissions: $e');
       emit(PermissionsError(message: 'Failed to request permissions: $e'));
     }
   }

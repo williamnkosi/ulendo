@@ -105,7 +105,9 @@ class PermissionsService {
     if (status.isGranted) {
       _logger.i('Permission granted: ${permission.displayName}');
     } else {
-      _logger.w('Permission denied: ${permission.displayName} (status: $status)');
+      _logger.w(
+        'Permission denied: ${permission.displayName} (status: $status)',
+      );
     }
     return status.isGranted;
   }
@@ -119,9 +121,28 @@ class PermissionsService {
     final result = <RideSharingPermission, bool>{};
 
     for (final permission in permissions) {
+      _logger.d('====== START PERMISSION REQUEST: ${permission.name} ======');
+
+      // Check status BEFORE request
+      final statusBefore = await permission.platformPermission.status;
+      _logger.d('Status BEFORE request: $statusBefore for ${permission.name}');
+
+      // Make the request
+      _logger.d(
+        'Calling platform request for: ${permission.name} (${permission.platformPermission})',
+      );
       final status = await permission.platformPermission.request();
+      _logger.d('Platform returned status: $status for ${permission.name}');
+
+      // Check status AFTER request
+      final statusAfter = await permission.platformPermission.status;
+      _logger.d('Status AFTER request: $statusAfter for ${permission.name}');
+
       result[permission] = status.isGranted;
-      _logger.d('${permission.displayName}: ${status.isGranted ? 'GRANTED' : 'DENIED'}');
+      _logger.d(
+        '${permission.name}: ${status.isGranted ? 'GRANTED' : 'DENIED'}',
+      );
+      _logger.d('====== END PERMISSION REQUEST: ${permission.name} ======');
     }
 
     return result;
@@ -146,7 +167,9 @@ class PermissionsService {
     _logger.i('Requesting driver-specific permissions');
     final results = await requestPermissions(driverPermissions);
     final allGranted = results.values.every((granted) => granted);
-    _logger.i('Driver permissions request completed: ${allGranted ? 'ALL GRANTED' : 'SOME DENIED'}');
+    _logger.i(
+      'Driver permissions request completed: ${allGranted ? 'ALL GRANTED' : 'SOME DENIED'}',
+    );
     return allGranted;
   }
 
@@ -156,7 +179,9 @@ class PermissionsService {
     _logger.i('Requesting rider-specific permissions');
     final results = await requestPermissions(riderPermissions);
     final allGranted = results.values.every((granted) => granted);
-    _logger.i('Rider permissions request completed: ${allGranted ? 'ALL GRANTED' : 'SOME DENIED'}');
+    _logger.i(
+      'Rider permissions request completed: ${allGranted ? 'ALL GRANTED' : 'SOME DENIED'}',
+    );
     return allGranted;
   }
 
