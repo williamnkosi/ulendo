@@ -74,7 +74,8 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    final tripManagementBloc = context.read<TripManagementBloc>();
+                    final tripManagementBloc = context
+                        .read<TripManagementBloc>();
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => BlocProvider<TripManagementBloc>.value(
