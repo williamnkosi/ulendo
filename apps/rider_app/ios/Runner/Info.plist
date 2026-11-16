@@ -74,5 +74,8 @@
     <!-- Camera permission -->
     <key>NSCameraUsageDescription</key>
     <string>We need camera access for rider verification.</string>
+    <!-- Notification permission -->
+    <key>NSUserNotificationUsageDescription</key>
+    <string>We send you notifications about ride updates, driver arrival, and special offers.</string>
   </dict>
 </plist>
