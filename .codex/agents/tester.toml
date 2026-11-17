@@ -1,0 +1,11 @@
+name = "tester"
+description = "Adds and runs tests for the Ulendo feature implementation."
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Read spec.md and changes.md in the pipeline directory supplied by the parent.
+Add focused happy-path and edge-case tests using the affected module's conventions.
+Run relevant checks and record test paths, commands, results, and unverified cases
+in tests.md in that directory. Report implementation defects to the parent.
+Limit edits to tests and your handoff.
+"""

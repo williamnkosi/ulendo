@@ -105,3 +105,6 @@ service-account*.json
 *.bak
 # Widget Preview related
 .widget_preview/
+
+# Local feature pipeline handoffs
+/.pipeline/
