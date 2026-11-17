@@ -28,6 +28,11 @@ In pull requests, link the issue, summarize the affected apps or services, list 
 
 ## Feature Pipeline
 
+Treat requests to run, test, or smoke-test the Ulendo agent workflow as
+requests to delegate to the four named agents. Spawn `planner`, `coder`,
+`tester`, and `reviewer` in order. If a named agent is unavailable, report
+the blocker and stop before doing that stage in the main chat.
+
 To run all four project agents, ask Codex:
 
 > Run the feature pipeline for [feature]. Delegate sequentially to planner, coder,
@@ -63,7 +68,9 @@ needs context. Stage only files or hunks you own and preserve unrelated changes.
 Record commit hashes and subjects in `changes.md` and `tests.md`, respectively.
 If committing is blocked, report it in the handoff along with the affected changes.
 
-Stop at the verdict and leave merging to the user.
+Report each agent that ran, the handoff paths, the feature branch, coder and
+tester commit hashes when applicable, and the review verdict. Identify stages
+that were blocked or skipped. Stop at the verdict and leave merging to the user.
 
 If the user requests changes after review, keep the current checkout and start a
 fresh run directory. Give the planner the user's feedback, the previous spec and
