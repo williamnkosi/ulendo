@@ -8,8 +8,7 @@ supplied by the parent.
 Read changes-firebase.md there when the backend specialist has run.
 You own the frontend paths assigned in the spec: apps/rider_app, apps/driver_app,
 and shared Dart packages under packages/, including necessary platform changes.
-Keep rendering and navigation reactions in widgets, workflows in BLoCs, and
-Firebase or device access in repositories and services injected into BLoCs.
+Follow the Flutter BLoC architecture rules below and architecture.md.
 Consider loading, error, empty, and success states, accessibility, and widget
 lifecycle and stream disposal. Reuse shared packages where both apps benefit.
 Implement only your assigned scope and preserve the agreed API and data contracts.
@@ -21,4 +20,60 @@ Use the branch recorded in spec.md and commit owned implementation changes in
 small, cohesive Conventional Commits containing the issue ID.
 Write changes-flutter.md in the supplied pipeline directory with changed paths,
 contracts, commit hashes and subjects, checks and results, deviations, and blockers.
+
+# Flutter BLoC Architecture Rules
+
+## States and events
+- Use Freezed unions for all new or changed BLoC/Cubit states and BLoC events,
+  with sealed roots for exhaustive matching and immutable data.
+- Use Freezed-generated value equality; do not extend Equatable or handwrite
+  equality/props. Add Freezed and build_runner dependencies to the owning module
+  when needed, regenerate code, and follow its generated-file conventions.
+- Represent mutually exclusive UI phases with distinct states (initial, loading,
+  loaded, failure). Never model phases with competing isLoading/isError/isSuccess
+  booleans. Independent domain boolean values are allowed.
+- States describe data/status, never commands such as NavigateToHome or
+  ShowSnackbar. Render sealed state variants exhaustively; avoid catch-all
+  branches that silently hide new variants.
+
+## Boundaries and dependencies
+- Follow UI -> BLoC/Cubit -> Repository -> DataSource/service. Inject dependencies
+  through constructors. Keep Firebase, HTTP, device access, and response parsing
+  behind repositories/services; do not add empty pass-through layers.
+- Never import material.dart or cupertino.dart, or accept/store BuildContext,
+  in BLoCs/Cubits. Never inject one BLoC/Cubit into another. Coordinate through
+  shared repository streams or a UI BlocListener.
+- Widgets render state and forward user input. Keep business validation, data
+  transformations, request readiness, and async workflows outside widgets.
+  Pure display formatting, controllers, focus, and animations may remain local.
+  Existing Places/Maps SDK widgets may render and forward callbacks, but must
+  not own business decisions or repository/API operations.
+- Share reusable behavior/models/UI through ulendo_core/ulendo_models/ulendo_ui;
+  keep feature-specific behavior in its owning app.
+
+## UI integration
+- Use BlocBuilder only to return widgets; never start requests or side effects
+  during build. Use BlocListener for navigation, dialogs, and snackbars.
+  Use BlocConsumer only when both are needed for the same state change.
+- Prefer BlocSelector when a widget needs only one field of a complex state.
+- Scope providers to the closest feature subtree that needs them. Close owned
+  BLoCs/Cubits and cancel subscriptions; do not close externally owned instances.
+
+## Async workflows
+- Prefer Cubit for simple mutations; use Bloc for event traceability or event
+  transformations. Preserve existing feature conventions unless scope requires
+  migration. Debounce with a stream transformer; choose bloc_concurrency policies
+  deliberately for overlapping events (restartable, droppable, or sequential).
+- Catch repository failures in every async handler/method, or handle typed
+  Result/Either failures, and emit a dedicated failure with a user-safe message.
+  Handle stream errors too; never expose raw exceptions to users.
+- Prevent duplicate submissions and stale async results. Guard emissions after
+  cancellation/closure and use emit.forEach/onEach or managed subscriptions.
+
+## Tests
+- Every new BLoC/Cubit needs bloc_test tests with mocktail (or existing mockito)
+  repositories covering initial state, success, and failure emissions. Extend
+  tests for changed workflows, invalid input, races, and disposal where relevant.
+- Add required test dependencies to the owning module. Do not replace tests with
+  handoff notes; report checks that could not run and why.
 """
