@@ -50,14 +50,23 @@ class TripManagementRepositoryImpl extends TripManagementRepository {
     required Location dropoff,
   }) async {
     try {
-      final callable = _functions.httpsCallable('requestTripFunction');
-      await callable.call({
+      final callable = _functions.httpsCallable('requestRideFunction');
+      final response = await callable.call({
         'pickup': pickup.toJson(),
         'dropoff': dropoff.toJson(),
       });
 
-      // TODO: Parse response and return RideRequest
-      throw UnimplementedError('requestTrip not implemented');
+      final data = response.data;
+      if (data is! Map || data['success'] != true) {
+        throw const FormatException('Invalid ride request response');
+      }
+
+      // The callable also returns rideId and message; RideRequest currently
+      // represents only the requested locations.
+      return RideRequest.fromJson({
+        'pickup': Map<String, dynamic>.from(data['pickup'] as Map),
+        'dropoff': Map<String, dynamic>.from(data['dropoff'] as Map),
+      });
     } catch (e) {
       throw Exception('Failed to request trip: $e');
     }
@@ -93,10 +102,7 @@ class TripManagementRepositoryImpl extends TripManagementRepository {
   Future<void> cancelTrip({required String tripId, String? reason}) async {
     try {
       final callable = _functions.httpsCallable('cancelTripFunction');
-      await callable.call({
-        'tripId': tripId,
-        'reason': reason,
-      });
+      await callable.call({'tripId': tripId, 'reason': reason});
     } catch (e) {
       throw Exception('Failed to cancel trip: $e');
     }
