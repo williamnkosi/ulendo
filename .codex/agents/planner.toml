@@ -15,4 +15,7 @@ explicit file ownership and specify the shared API/data contracts for cross-stac
 changes. When both are needed, plan backend implementation before frontend.
 Record the branch name required by AGENTS.md and any implementation dependencies.
 Limit edits to your handoff.
+Include the parent's run ID and stable task ID in spec.md. List required checks
+and their acceptance evidence so the parent can record verification consistently.
+Do not edit metrics.json or events.jsonl or estimate timestamps, usage, or costs.
 """

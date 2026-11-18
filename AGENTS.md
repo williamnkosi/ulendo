@@ -28,6 +28,25 @@ In pull requests, link the issue, summarize the affected apps or services, list 
 
 ## Feature Pipeline
 
+### Evaluation and observability
+
+The parent must follow [the telemetry guide](docs/pipeline-observability.md) for
+every new pipeline run. Before dispatching the planner, initialize the fresh run
+directory with `scripts/evaluate_pipeline.py init`; this creates `metrics.json`
+and `events.jsonl`. Pass the run ID, stable task ID, directory, and base commit
+to every agent. Reuse the task ID on revision runs, keeping each run ID unique.
+Record stage start immediately before dispatch and its terminal result after
+the handoff. Record skipped specialists and blocked stages with reasons.
+The parent is the sole telemetry writer; agents supply evidence in handoffs.
+Record each required check execution and each review verdict, corrections or
+rescue actions by the user, and the final pipeline result. Ordinary requirements
+and approvals are not interventions. Pipeline completion, acceptance criteria,
+review approval, and explicit human acceptance are separate observations.
+Never infer human acceptance from review approval or merging readiness.
+Use the tool's UTC timestamps. Never invent historical timestamps, usage, or cost.
+Unavailable measurements remain null. Finish telemetry even when a run is blocked.
+Include the telemetry paths and scorecard command in the final pipeline report.
+
 Treat requests to run, test, or smoke-test the Ulendo agent workflow as
 requests to delegate to the project agents. Spawn `planner`, the required coding
 specialist(s), `tester`, and `reviewer` in order. Use `firebase_coder` for Firebase
