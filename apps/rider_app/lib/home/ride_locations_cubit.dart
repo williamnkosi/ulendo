@@ -31,6 +31,17 @@ class RideLocationsCubit extends Cubit<RideLocationsState> {
   final _texts = <RideLocationField, String>{};
   final _locations = <RideLocationField, Location>{};
 
+  /// Read at submission time, including before a pending UI rebuild.
+  RideRequest? get request => switch (state) {
+    RideLocationsInitial() => null,
+    RideLocationsPending() => null,
+    RideLocationsReady(:final pickup, :final dropoff) => RideRequest(
+      pickup: pickup,
+      dropoff: dropoff,
+    ),
+    RideLocationsFailure() => null,
+  };
+
   void textChanged(RideLocationField field, String text) {
     if (isClosed) return;
     _texts[field] = text;

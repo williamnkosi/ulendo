@@ -207,14 +207,16 @@ class _RideRequestPageState extends State<_RideRequestForm> {
                               onPressed: isLoading || request == null
                                   ? null
                                   : () {
+                                      final currentRequest = _locations.request;
+                                      if (currentRequest == null) return;
                                       logger.info(
                                         'Search Rides button pressed',
                                       );
 
                                       context.read<TripManagementBloc>().add(
                                         RequestTripEvent(
-                                          pickup: request.pickup,
-                                          dropoff: request.dropoff,
+                                          pickup: currentRequest.pickup,
+                                          dropoff: currentRequest.dropoff,
                                         ),
                                       );
                                     },
