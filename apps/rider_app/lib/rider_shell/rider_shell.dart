@@ -5,8 +5,8 @@ import 'package:rider_app/account/account_page.dart';
 import 'package:rider_app/activity/activity_page.dart';
 import 'package:rider_app/home/home_page.dart';
 import 'package:rider_app/user_data_form/user_data_form.dart';
-import 'package:rider_app/ride/ride_bloc.dart';
-import 'package:rider_app/ride/ride_repository.dart';
+import 'package:rider_app/trip_management_bloc/index.dart';
+import 'package:rider_app/trip_management_bloc/trip_management_repository.dart';
 import 'package:ulendo_core/user_data/user_data_bloc.dart';
 import 'package:ulendo_core/user_data/user_data_event.dart';
 import 'package:ulendo_core/user_data/user_data_repository.dart';
@@ -56,8 +56,10 @@ class _RiderShellState extends State<RiderShell> {
           create: (context) =>
               PermissionsBloc()..add(const RequestRiderPermissionsEvent()),
         ),
-        BlocProvider<RideBloc>(
-          create: (context) => RideBloc(rideRepository: RideRepositoryImpl()),
+        BlocProvider<TripManagementBloc>(
+          create: (context) => TripManagementBloc(
+            repository: TripManagementRepositoryImpl(),
+          ),
         ),
       ],
       child: BlocBuilder<UserDataBloc, UserDataState>(

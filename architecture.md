@@ -67,27 +67,29 @@ behavior; changed workflows need relevant regression and concurrency coverage.
 
 ## Rider app
 
-The pickup and drop-off form in `apps/rider_app/lib/home/` uses a Google Places
-autocomplete widget. When the rider submits the form, `RideBloc` calls
-`RideRepository` in `apps/rider_app/lib/ride/`. The repository invokes the
-Firebase callable `requestRideFunction`, and the BLoC emits state that the
-form uses to show the result. The repository exposes cancellation and ride
-lookup methods that remain unimplemented.
+The rider presentation layer collects pickup and drop-off locations and
+displays trip progress and feedback. Business logic owns the rider workflow,
+including requesting a ride and reacting to live trip updates. Repositories
+provide access to backend operations and trip data streams.
+
+Trip lifecycle changes should preserve the active trip's identity and keep
+displayed progress consistent with backend state. The developer agent chooses
+the BLoC names, events, states, and internal structure needed for the feature.
+Feature specifications define required behavior and acceptance criteria;
+unfinished implementation work belongs in feature handoffs and issue tracking.
 
 ## Driver app
 
-`RideManagementBloc` in `apps/driver_app/lib/rides/bloc/` coordinates driver
-availability and ride transitions. Its dependencies in
-`apps/driver_app/lib/services/` include:
+Driver business logic coordinates availability, ride offers, and trip
+transitions. Repositories and services provide:
 
-- `LocationService` reads device location through Geolocator and publishes
-  driver presence and location to Firebase Realtime Database.
-- `RideManagementService` reads and updates live ride and driver records in
-  Realtime Database.
-- `PolylineService` fetches route geometry from Google Directions.
+- Device location and publication of driver presence and location.
+- Access to live ride and driver records.
+- Route geometry for map presentation.
 
-`NotificationHubBloc` handles ride notification events. Driver screens display
-location and route data with Google Maps widgets.
+Notification handling delivers ride offers and updates to the relevant
+workflow. Driver screens display location and route data. The developer agent
+chooses component names and internal structure within these layer boundaries.
 
 ## Shared packages
 
