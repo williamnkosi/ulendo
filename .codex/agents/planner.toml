@@ -10,5 +10,9 @@ Inspect the repository and trace the relevant Flutter, Dart, or Firebase entry p
 Write the spec to spec.md in the pipeline directory supplied by the parent.
 Include existing and proposed paths, affected interfaces and signatures, edge cases,
 acceptance criteria, and verification commands. Flag unresolved product decisions.
+Select firebase_coder, flutter_coder, or both based on the affected paths. Assign
+explicit file ownership and specify the shared API/data contracts for cross-stack
+changes. When both are needed, plan backend implementation before frontend.
+Record the branch name required by AGENTS.md and any implementation dependencies.
 Limit edits to your handoff.
 """
