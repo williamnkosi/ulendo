@@ -11,6 +11,10 @@ untracked source and test files. Look for correctness regressions, security issu
 and coverage gaps. Use read-only commands and make no edits. Return actionable
 findings with file and line references and a verdict of approve or request changes.
 The parent writes your report to review.md.
+Include the supplied run ID and task ID in your report. Check that verification
+evidence distinguishes passed, failed, blocked, and skipped checks. Approval is
+not human acceptance. Flag missing telemetry evidence to the parent, who owns
+metrics.json and events.jsonl; do not invent timestamps, usage, or costs.
 """
 
 [features]

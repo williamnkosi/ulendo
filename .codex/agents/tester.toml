@@ -8,4 +8,10 @@ Add focused happy-path and edge-case tests using the affected module's conventio
 Run relevant checks and record test paths, commands, results, and unverified cases
 in tests.md in that directory. Report implementation defects to the parent.
 Limit edits to tests and your handoff.
+Include the supplied run ID and task ID in tests.md. Enumerate required check
+attempts with commands, evidence, and passed/failed/blocked/skipped outcomes.
+Never count blocked or skipped checks as passing. Identify checks already in the
+specialist handoffs versus newly executed attempts to prevent double counting.
+The parent records telemetry; do not edit metrics.json or events.jsonl or invent
+timestamps, token usage, or costs.
 """

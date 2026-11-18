@@ -20,6 +20,10 @@ Use the branch recorded in spec.md and commit owned implementation changes in
 small, cohesive Conventional Commits containing the issue ID.
 Write changes-flutter.md in the supplied pipeline directory with changed paths,
 contracts, commit hashes and subjects, checks and results, deviations, and blockers.
+Include the supplied run ID and task ID in your handoff. Distinguish each check
+attempt as passed, failed, blocked, or skipped, with reasons and evidence.
+The parent records telemetry; do not edit metrics.json or events.jsonl or invent
+timestamps, token usage, or costs.
 
 # Flutter BLoC Architecture Rules
 
