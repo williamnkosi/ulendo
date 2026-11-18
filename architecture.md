@@ -27,6 +27,44 @@ Each app initializes Firebase and provides its authentication BLoC in
 The rider and driver shells construct feature BLoCs and pass in their
 dependencies through constructors.
 
+## Flutter state management boundaries
+
+For new or changed workflows, follow
+`UI → BLoC/Cubit → Repository → DataSource/service`. Services are the existing
+platform/API adapters; do not add pass-through classes solely to satisfy the
+layer names. Inject dependencies through constructors. BLoCs/Cubits must not
+depend on Flutter UI types, `BuildContext`, or other BLoCs/Cubits. Coordinate
+features through shared repository streams or presentation-layer listeners.
+
+Use Freezed unions with sealed roots for all new or changed BLoC/Cubit states
+and BLoC events. Use immutable data, Freezed-generated value equality, and
+exhaustive state rendering; do not add Equatable or handwritten equality/props.
+Add the required Freezed/build_runner dependencies to the owning module when
+needed and regenerate code following its generated-file conventions.
+Represent mutually exclusive workflow phases as distinct
+states, rather than competing loading/error/success flags. States describe
+status and data, never navigation or snackbar commands.
+
+Widgets render state and forward input. Keep business validation, coordinate
+conversion, request readiness, and asynchronous workflows in the business/data
+layers. Local controllers, focus, animations, and pure display formatting remain
+presentation concerns. Existing Places/Maps SDK widgets may render and forward
+callbacks; this integration does not authorize business logic or repository/API
+calls in widgets.
+
+Use `BlocBuilder` for rendering, `BlocListener` for one-time UI reactions, and
+`BlocConsumer` when both are needed for the same transition. Prefer `BlocSelector`
+for a widget depending on a single field of a complex state. Scope providers to
+the nearest feature subtree and dispose owned instances and subscriptions.
+
+Prefer Cubit for simple mutations and Bloc for event traceability or event
+transformations; preserve existing feature conventions within unrelated changes.
+Choose debounce and concurrency behavior deliberately, prevent duplicate requests
+and stale results, handle async/stream failures with user-safe failure states,
+and guard emissions after cancellation or closure. Every new BLoC/Cubit needs
+`bloc_test` tests with mocked repositories for initial, success, and failure
+behavior; changed workflows need relevant regression and concurrency coverage.
+
 ## Rider app
 
 The rider presentation layer collects pickup and drop-off locations and
