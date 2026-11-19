@@ -14,6 +14,11 @@ appropriate Flutter layers and suggest a shared package when both apps can
 reuse the same behavior or data contract.
 Inspect the repository and trace the relevant Flutter, Dart, or Firebase entry points.
 Write the spec to spec.md in the pipeline directory supplied by the parent.
+For post-review revisions, use the focused revision format in
+docs/pipeline-handoffs.md instead of rewriting the feature spec. Read the baseline,
+applicable previous revisions, feedback, review findings, and current implementation.
+Reference unchanged requirements and explicitly identify replaced criteria.
+Preserve the confirmed branch and original base commit across revisions.
 Include existing and proposed paths, affected interfaces and signatures, edge cases,
 acceptance criteria, and verification commands. Flag unresolved product decisions.
 Select firebase_coder, flutter_coder, or both based on the affected paths. Assign

@@ -214,11 +214,26 @@ Report each agent that ran, the handoff paths, the feature branch, specialist an
 tester commit hashes when applicable, and the review verdict. Identify stages
 that were blocked or skipped. Stop at the verdict and leave merging to the user.
 
-If the user requests changes after review, keep the current checkout and start a
-fresh run directory. Give the planner the user's feedback, the previous spec and
-review, and the current implementation. Ask for a revised spec that records the
-requested changes, updated acceptance criteria, and behavior to preserve. Pass
-the revised spec to the required coding specialists, combine their handoffs, then
-run the tester and reviewer again. The
-reviewer checks the full feature diff against the original base commit. Report
-the new verdict and wait for the user's decision.
+If the pipeline completes through review and the user subsequently inspects the
+implementation and requests changes, keep the current checkout and start a fresh
+run directory. Reuse the stable task ID, confirmed feature branch, and original
+base commit. This revision procedure is not triggered merely by a setup blocker.
+
+The parent gives the planner a file-based input containing the user's feedback,
+relevant review findings, current implementation paths/state, and exact paths to
+the original spec, latest revision spec (if any), and previous review. The planner
+writes a focused correction plan as the new run's `spec.md`, using the revision
+format in docs/pipeline-handoffs.md. Do not rewrite the entire feature spec.
+
+The original spec remains the baseline. Each revision references the original
+spec and any still-applicable earlier revisions, explicitly identifies requirements
+it replaces by criterion ID, and preserves everything else. For each stage, the
+parent lists these exact required spec paths in its input file; agents read the
+baseline and applicable revisions, not only the newest correction plan. Conflicting
+requirements are reported to the parent rather than silently dropped.
+
+Pass these specs to the required coding specialists, combine their handoffs, then
+run the tester and reviewer again. Select specialists by correction scope and record
+skipped roles with reasons. The reviewer verifies the corrections and the full
+feature diff against the original base commit using all applicable requirements,
+not just the newest commits. Report the new verdict and wait for the user's decision.

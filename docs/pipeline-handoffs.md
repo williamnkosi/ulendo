@@ -19,6 +19,48 @@ the reason and the earlier attempt ID. Inherited results retain their original
 attempt IDs and evidence paths and are not new telemetry executions. Reuse them
 only under AGENTS.md's verification rules; required repeatability runs still execute.
 
+## Focused revision spec
+
+Use this for the new run's `spec.md` after the user inspects a completed pipeline
+and requests changes. This is a correction plan, not a replacement feature spec.
+Keep it concise; preserve enough detail to implement and verify every correction.
+
+```markdown
+# Revision spec
+Run: <new run-id> | Task: <stable task-id> | Issue: <issue-id>
+Branch: <existing feature branch> | Original base: <unchanged hash>
+Baseline spec: <absolute original spec path>
+Applicable earlier revisions: <exact paths, or None>
+Previous review: <absolute path>
+Implementation at planning: <HEAD and relevant uncommitted state>
+
+## Required corrections
+- <correction ID> — <user request/review finding; relevant paths and intended behavior>
+
+## Requirements changed and behavior preserved
+- <criterion ID explicitly replaced> — <updated requirement and reason; or None>
+- <specific behavior/contracts at risk that must remain unchanged>
+- All other baseline and applicable revision requirements remain in force.
+
+## Ownership and contracts
+- <required specialist> — <owned paths, interfaces and cross-stack dependencies>
+- <skipped specialist> — <reason>
+
+## Acceptance and verification
+- <correction ID> — <observable acceptance, focused regression checks and evidence>
+- <applicable existing checks; evidence reuse/rerun decisions follow AGENTS.md>
+
+## Blockers and unresolved decisions
+- <issue, impact and next action; or None>
+```
+
+For multiple revisions, retain references to earlier corrections still in force.
+The parent includes all applicable spec paths in every stage input. Avoid copying
+their content into the new plan. New user requests govern intentional changes;
+report ambiguities instead of assuming requirements have been removed.
+Review still covers the full feature diff against the original base, including
+preserved feature behavior and the latest corrections.
+
 ## Specialist and combined implementation reports
 
 Use for `changes-firebase.md`, `changes-flutter.md`, and parent-owned `changes.md`.
