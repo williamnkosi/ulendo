@@ -23,6 +23,15 @@ module.exports = {
     "/generated/**/*", // Ignore generated files.
   ],
   plugins: ["@typescript-eslint", "import"],
+  overrides: [{
+    files: ["scripts/**/*.js", "test/**/*.js"],
+    parserOptions: { project: null, ecmaVersion: 2022 },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "max-len": ["error", { code: 140 }],
+      "object-curly-spacing": ["error", "always"],
+    },
+  }],
   rules: {
     // eslint-disable-next-line quote-props
     quotes: ["error", "double"],

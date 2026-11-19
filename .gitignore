@@ -108,3 +108,7 @@ service-account*.json
 
 # Local feature pipeline handoffs
 /.pipeline/
+
+# Isolated backend test caches and logs
+/.cache/backend-tests/
+/.artifacts/backend-tests/
