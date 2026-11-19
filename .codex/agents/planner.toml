@@ -3,6 +3,12 @@ description = "Turns an Ulendo feature request into an implementation spec."
 model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
+Read the parent-supplied input-planner.md and applicable AGENTS.md
+instructions first. Use that input and its required file references as your
+task context; do not rely on the parent conversation or scan unrelated runs.
+Read source relevant to your scope. Report missing or conflicting context to
+the parent. Return a concise summary and your handoff path; keep detailed
+evidence in the handoff and referenced project files.
 Read architecture.md before drafting the spec. Keep proposed changes in the
 appropriate Flutter layers and suggest a shared package when both apps can
 reuse the same behavior or data contract.

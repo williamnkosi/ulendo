@@ -3,6 +3,12 @@ description = "Adds and runs tests for the Ulendo feature implementation."
 model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 developer_instructions = """
+Read the parent-supplied input-tester.md and applicable AGENTS.md
+instructions first. Use that input and its required file references as your
+task context; do not rely on the parent conversation or scan unrelated runs.
+Read source relevant to your scope. Report missing or conflicting context to
+the parent. Return a concise summary and your handoff path; keep detailed
+evidence in the handoff and referenced project files.
 Read spec.md and changes.md in the pipeline directory supplied by the parent.
 Add focused happy-path and edge-case tests using the affected module's conventions.
 Run relevant checks and record test paths, commands, results, and unverified cases

@@ -55,6 +55,50 @@ planner dispatch. Keep this check limited to issue, branch/checkout, and known
 blockers. Dependency and runtime verification belongs to the coding and test
 agents for their assigned scope; do not perform a broad dependency scan here.
 
+### Agent context through the run folder
+
+Before each stage, the parent writes `.pipeline/<run-id>/input-<role>.md`,
+where role is `planner`, `firebase_coder`, `flutter_coder`, `tester`, or `reviewer`.
+Create only the inputs needed for stages that will run. Each input contains:
+
+- The task objective, relevant user requirements and decisions, and stage assignment.
+- Repository root, run ID, stable task ID, issue ID, confirmed branch, run directory,
+  and original base commit (preserved across revisions).
+- Assigned path ownership, relevant source entry points, and required API/data
+  contracts, directly or by reference to the spec.
+- Known blockers and checkout changes to preserve, including their evidence paths.
+- Exact paths to required reading and the expected handoff filename. The reviewer
+  returns its verdict to the parent, who writes `review.md`.
+
+Use concise summaries and file references rather than conversation transcripts or
+copied logs. Preserve all applicable user constraints in these files; agents must
+not need the parent chat to understand their assignment. Use absolute paths for
+input and referenced files. Before dispatch, ensure required input files exist
+and reflect the latest completed handoffs and user decisions.
+
+Spawn each stage with `fork_turns="none"` and a short message identifying its role,
+repository root, and absolute input-file path. Tell it to read that file and
+applicable AGENTS.md instructions first. Do not inherit the parent conversation.
+If context cannot be supplied through files, report the limitation rather than
+silently dispatching with incomplete requirements.
+
+Agents read their input, its required references, and source relevant to their
+scope; they do not scan the entire run folder or unrelated historical runs.
+Required stage reading remains:
+
+- Planner: feature requirements; architecture; prior spec/review and user feedback
+  for revisions, when applicable.
+- Firebase coder: architecture and `spec.md`.
+- Flutter coder: architecture, `spec.md`, and `changes-firebase.md` when Firebase ran.
+- Tester: `spec.md` and combined `changes.md`.
+- Reviewer: architecture, `spec.md`, `changes.md`, and `tests.md`; inspect the full
+  feature diff against the original base commit.
+
+When new user decisions affect a running stage, the parent updates its input file
+and sends a short message pointing to the update. Agents report missing or
+conflicting context to the parent instead of guessing. Return a concise stage
+summary and handoff path; keep detailed evidence in referenced project files.
+
 ### Evaluation and observability
 
 The parent must follow [the telemetry guide](docs/pipeline-observability.md) for
