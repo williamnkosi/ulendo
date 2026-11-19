@@ -99,6 +99,20 @@ and sends a short message pointing to the update. Agents report missing or
 conflicting context to the parent instead of guessing. Return a concise stage
 summary and handoff path; keep detailed evidence in referenced project files.
 
+### Concise handoffs
+
+Use [the handoff formats](docs/pipeline-handoffs.md) for specialist reports,
+combined `changes.md`, `tests.md`, and the review report. Keep results, contracts,
+commits, and unresolved issues in the handoff; put full command output in separate
+project-local logs and reference their exact paths. Do not repeat the spec, input
+assignment, conversation, or previous reports. Reference acceptance criteria by ID.
+Target 500 words per report, excluding tables; exceed this when needed to preserve
+material findings or evidence. Never omit failures, blockers, deviations, uncommitted
+changes, or verification gaps to meet a length target. The planner's `spec.md`
+remains the requirements document, not a results handoff subject to this format.
+The parent combines specialist results without duplicating shared background or
+check attempts and preserves evidence references for telemetry and later stages.
+
 ### Evaluation and observability
 
 The parent must follow [the telemetry guide](docs/pipeline-observability.md) for

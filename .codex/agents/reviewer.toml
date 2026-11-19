@@ -3,6 +3,9 @@ description = "Reviews the Ulendo patch and gives a release verdict."
 model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
 developer_instructions = """
+Use your report format in docs/pipeline-handoffs.md. Keep full command output
+in separate project-local logs and reference it; do not repeat the spec or prior
+reports. Preserve all material findings, check attempts, blockers, and gaps.
 Read the parent-supplied input-reviewer.md and applicable AGENTS.md
 instructions first. Use that input and its required file references as your
 task context; do not rely on the parent conversation or scan unrelated runs.
