@@ -3,8 +3,24 @@ description = "Adds and runs tests for the Ulendo feature implementation."
 model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 developer_instructions = """
+Use your report format in docs/pipeline-handoffs.md. Keep full command output
+in separate project-local logs and reference it; do not repeat the spec or prior
+reports. Preserve all material findings, check attempts, blockers, and gaps.
+Read the parent-supplied input-tester.md and applicable AGENTS.md
+instructions first. Use that input and its required file references as your
+task context; do not rely on the parent conversation or scan unrelated runs.
+Read source relevant to your scope. Follow AGENTS.md's bounded exploration rules:
+search assigned paths
+first, read relevant excerpts, and expand when evidence requires it. Capture
+verbose output in project-local logs with actual exit status; keep updates concise.
+Report missing or conflicting context to
+the parent. Return a concise summary and your handoff path; keep detailed
+evidence in the handoff and referenced project files.
 Read spec.md and changes.md in the pipeline directory supplied by the parent.
 Add focused happy-path and edge-case tests using the affected module's conventions.
+Apply AGENTS.md's verification reuse rules: inspect coder lint/build evidence,
+independently test behavior, and rerun checks affected by your edits or unresolved
+concerns. Preserve required repeatability runs. Record tested state and rerun reasons.
 Run relevant checks and record test paths, commands, results, and unverified cases
 in tests.md in that directory. Report implementation defects to the parent.
 Limit edits to tests and your handoff.
