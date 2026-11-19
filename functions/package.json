@@ -8,7 +8,10 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "test:fixtures": "node --test test/fixtures.test.js",
+    "test:guards": "node --test test/safety.test.js test/supervise.test.js",
+    "test:emulators": "node scripts/run-emulator-tests.js"
   },
   "engines": {
     "node": "20"
@@ -26,7 +29,19 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^3.4.1",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "firebase-tools": "15.28.2",
+    "@firebase/rules-unit-testing": "5.0.1",
+    "firebase": "12.14.0"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "firebase-tools": {
+      "@google-cloud/cloud-sql-connector": "1.10.0",
+      "universal-analytics": "0.5.3",
+      "superstatic": {
+        "re2": "1.24.0"
+      }
+    }
+  }
 }

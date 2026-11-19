@@ -1,0 +1,1526 @@
+[
+  {
+    "id": "5a-01",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "rider"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "sessionRole": "rider",
+        "serverTime": 1000000
+      }
+    }
+  },
+  {
+    "id": "5a-02",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "serverTime": 1000000,
+        "effectiveDriverAvailability": "available"
+      }
+    }
+  },
+  {
+    "id": "5a-03",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "rider"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "sessionRole": "rider",
+        "serverTime": 1000000,
+        "activeTrip": {
+          "schemaVersion": 1,
+          "rideId": "r1",
+          "riderId": "u-dual",
+          "status": "searching",
+          "version": 1,
+          "pickup": {
+            "lat": 0,
+            "lng": 0,
+            "address": "A"
+          },
+          "dropoff": {
+            "lat": 1,
+            "lng": 1,
+            "address": "B"
+          },
+          "createdAt": 990000,
+          "updatedAt": 990000,
+          "searchDeadlineAt": 1110000
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-04",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "serverTime": 1000000,
+        "effectiveDriverAvailability": "reserved",
+        "pendingOffer": {
+          "schemaVersion": 1,
+          "offerId": "o2",
+          "rideId": "r2",
+          "driverId": "u-dual",
+          "status": "pending",
+          "createdAt": 995000,
+          "expiresAt": 1015000,
+          "rideVersion": 2,
+          "pickup": {
+            "lat": 0,
+            "lng": 0,
+            "address": "A"
+          },
+          "dropoff": {
+            "lat": 1,
+            "lng": 1,
+            "address": "B"
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-05",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "serverTime": 1000000,
+        "effectiveDriverAvailability": "on_trip",
+        "activeTrip": {
+          "schemaVersion": 1,
+          "rideId": "r2",
+          "riderId": "u-other",
+          "driverId": "u-dual",
+          "status": "accepted",
+          "version": 3,
+          "pickup": {
+            "lat": 0,
+            "lng": 0,
+            "address": "A"
+          },
+          "dropoff": {
+            "lat": 1,
+            "lng": 1,
+            "address": "B"
+          },
+          "createdAt": 990000,
+          "updatedAt": 999000,
+          "searchDeadlineAt": 1110000,
+          "acceptedAt": 999000
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-06",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "rider"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "sessionRole": "rider",
+        "serverTime": 1000000,
+        "blockedByRole": "driver",
+        "lastTerminal": {
+          "rideId": "prior-rider",
+          "version": 7,
+          "endedAt": 900000
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-07",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "serverTime": 1000000,
+        "effectiveDriverAvailability": "offline",
+        "blockedByRole": "rider",
+        "lastTerminal": {
+          "rideId": "prior-driver",
+          "version": 6,
+          "endedAt": 800000
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-08",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "invalid_session_role",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-09",
+    "section": "5a",
+    "value": {
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "admin"
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "invalid_session_role",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-10",
+    "section": "5a",
+    "value": {
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "cross_role_busy",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-11",
+    "section": "5a",
+    "value": {
+      "error": {
+        "code": "permission-denied",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "self_match_forbidden",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5a-12",
+    "section": "5a",
+    "value": {
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "reconciliation_required",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5b-01",
+    "section": "5b",
+    "value": {
+      "case": "inspect",
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "action": "inspect",
+        "publisherId": "00000000-0000-4000-8000-000000000001"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1000000,
+        "currentGeneration": 0,
+        "matchesPublisher": false
+      }
+    }
+  },
+  {
+    "id": "5b-02",
+    "section": "5b",
+    "value": {
+      "case": "acquire",
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "action": "acquire",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "acquisitionId": "00000000-0000-4000-8000-000000000002",
+        "expectedGeneration": 0
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1000000,
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "lastAcceptedSequence": 0,
+        "nextSequence": 1,
+        "replayed": false
+      }
+    }
+  },
+  {
+    "id": "5b-03",
+    "section": "5b",
+    "value": {
+      "case": "lost-acquire-response-retry",
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "action": "acquire",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "acquisitionId": "00000000-0000-4000-8000-000000000002",
+        "expectedGeneration": 0
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1000100,
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "lastAcceptedSequence": 0,
+        "nextSequence": 1,
+        "replayed": true
+      }
+    }
+  },
+  {
+    "id": "5b-04",
+    "section": "5b",
+    "value": {
+      "case": "first-sample",
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "sequence": 1,
+        "capturedAt": 999000,
+        "lat": 0,
+        "lng": 0,
+        "accuracyMeters": 5
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1000000,
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "sequence": 1,
+        "outcome": "accepted",
+        "acceptedAt": 1000000,
+        "capturedAt": 999000,
+        "locationValidUntil": 1009000,
+        "heartbeatValidUntil": 1030000
+      }
+    }
+  },
+  {
+    "id": "5b-05",
+    "section": "5b",
+    "value": {
+      "case": "same-sample-replay",
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "sequence": 1,
+        "capturedAt": 999000,
+        "lat": 0,
+        "lng": 0,
+        "accuracyMeters": 5
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1020000,
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "sequence": 1,
+        "outcome": "duplicate",
+        "acceptedAt": 1000000,
+        "capturedAt": 999000,
+        "locationValidUntil": 1009000,
+        "heartbeatValidUntil": 1030000
+      }
+    }
+  },
+  {
+    "id": "5b-06",
+    "section": "5b",
+    "value": {
+      "case": "changed-duplicate",
+      "given": {
+        "lastSequence": 1
+      },
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "sequence": 1,
+        "capturedAt": 999000,
+        "lat": 1,
+        "lng": 0,
+        "accuracyMeters": 5
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "sequence_reused",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5b-07",
+    "section": "5b",
+    "value": {
+      "case": "lower-sequence",
+      "given": {
+        "lastSequence": 3
+      },
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "sequence": 2,
+        "capturedAt": 999000,
+        "lat": 0,
+        "lng": 0,
+        "accuracyMeters": 5
+      },
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "out_of_order_sample",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5b-08",
+    "section": "5b",
+    "value": {
+      "case": "explicit-replacement",
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "action": "acquire",
+        "publisherId": "00000000-0000-4000-8000-000000000004",
+        "acquisitionId": "00000000-0000-4000-8000-000000000005",
+        "expectedGeneration": 1
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1000000,
+        "publisherId": "00000000-0000-4000-8000-000000000004",
+        "sessionId": "00000000-0000-4000-8000-000000000006",
+        "generation": 2,
+        "lastAcceptedSequence": 0,
+        "nextSequence": 1,
+        "replayed": false
+      }
+    }
+  },
+  {
+    "id": "5b-09",
+    "section": "5b",
+    "value": {
+      "case": "stale-publisher-upload",
+      "given": {
+        "currentGeneration": 2
+      },
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "sequence": 4,
+        "capturedAt": 999000,
+        "lat": 0,
+        "lng": 0,
+        "accuracyMeters": 5
+      },
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "stale_telemetry_session",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5b-10",
+    "section": "5b",
+    "value": {
+      "case": "old-acquisition-replay",
+      "given": {
+        "currentGeneration": 2
+      },
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "action": "acquire",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "acquisitionId": "00000000-0000-4000-8000-000000000002",
+        "expectedGeneration": 0
+      },
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "session_generation_conflict",
+          "retryable": false,
+          "currentGeneration": 2
+        }
+      }
+    }
+  },
+  {
+    "id": "5b-11",
+    "section": "5b",
+    "value": {
+      "case": "restart-lost-ack-resume",
+      "given": {
+        "lastAcceptedSequence": 4
+      },
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "action": "resume",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1000000,
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "lastAcceptedSequence": 4,
+        "nextSequence": 5,
+        "replayed": false
+      }
+    }
+  },
+  {
+    "id": "5b-12",
+    "section": "5b",
+    "value": {
+      "case": "close",
+      "request": {
+        "schemaVersion": 1,
+        "sessionRole": "driver",
+        "publisherId": "00000000-0000-4000-8000-000000000001",
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1
+      },
+      "response": {
+        "schemaVersion": 1,
+        "serverTime": 1000000,
+        "sessionId": "00000000-0000-4000-8000-000000000003",
+        "generation": 1,
+        "closed": true
+      }
+    }
+  },
+  {
+    "id": "5b-13",
+    "section": "5b",
+    "value": {
+      "case": "capture-age-boundary",
+      "given": {
+        "acceptedAt": 1000000,
+        "capturedAt": 990000
+      },
+      "expected": {
+        "accepted": true,
+        "locationValidUntil": 1000000,
+        "matchableAtReceipt": false
+      }
+    }
+  },
+  {
+    "id": "5b-14",
+    "section": "5b",
+    "value": {
+      "case": "capture-too-old",
+      "given": {
+        "acceptedAt": 1000000,
+        "capturedAt": 989999
+      },
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "sample_too_old",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5b-15",
+    "section": "5b",
+    "value": {
+      "case": "future-boundary",
+      "given": {
+        "acceptedAt": 1000000,
+        "capturedAt": 1002000
+      },
+      "expected": {
+        "accepted": true,
+        "locationValidUntil": 1012000
+      }
+    }
+  },
+  {
+    "id": "5b-16",
+    "section": "5b",
+    "value": {
+      "case": "future-too-far",
+      "given": {
+        "acceptedAt": 1000000,
+        "capturedAt": 1002001
+      },
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "sample_clock_skew",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5b-17",
+    "section": "5b",
+    "value": {
+      "case": "heartbeat-boundary",
+      "given": {
+        "acceptedAt": 1000000,
+        "heartbeatValidUntil": 1030000,
+        "now": 1030000,
+        "assignment": "on_trip"
+      },
+      "expected": {
+        "receivedLiveness": false,
+        "matchable": false,
+        "assignmentRetained": true
+      }
+    }
+  },
+  {
+    "id": "5b-18",
+    "section": "5b",
+    "value": {
+      "case": "client-direct-write",
+      "request": {
+        "path": "/driver_presence/u-driver",
+        "write": {
+          "lat": 0,
+          "lng": 0
+        }
+      },
+      "expected": {
+        "rulesResult": "permission-denied",
+        "callableAck": false
+      }
+    }
+  },
+  {
+    "id": "5c-01",
+    "section": "5c",
+    "value": {
+      "case": "online-first",
+      "request": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "online": true
+      },
+      "response": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "serverTime": 1000000,
+        "replayed": false,
+        "committed": {
+          "online": true,
+          "onlineRevision": 1,
+          "onlineChangedAt": 1000000,
+          "intentChanged": true,
+          "committedAt": 1000000,
+          "availabilityObservation": {
+            "effectiveDriverAvailability": "available",
+            "observedAt": 1000000
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-02",
+    "section": "5c",
+    "value": {
+      "case": "online-replay-after-newer-offline",
+      "given": {
+        "currentOnlineIntent": false,
+        "currentOnlineRevision": 2,
+        "eligible": false
+      },
+      "request": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "online": true
+      },
+      "response": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "serverTime": 1000500,
+        "replayed": true,
+        "committed": {
+          "online": true,
+          "onlineRevision": 1,
+          "onlineChangedAt": 1000000,
+          "intentChanged": true,
+          "committedAt": 1000000,
+          "availabilityObservation": {
+            "effectiveDriverAvailability": "available",
+            "observedAt": 1000000
+          }
+        }
+      },
+      "expected": {
+        "reapplyToggle": false,
+        "changeRevision": false,
+        "withdrawNewerOffer": false
+      }
+    }
+  },
+  {
+    "id": "5c-03",
+    "section": "5c",
+    "value": {
+      "case": "online-noop-fresh-command",
+      "request": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-42a4-7000-8000-000000000002",
+        "online": true
+      },
+      "response": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-42a4-7000-8000-000000000002",
+        "serverTime": 1000100,
+        "replayed": false,
+        "committed": {
+          "online": true,
+          "onlineRevision": 1,
+          "onlineChangedAt": 1000000,
+          "intentChanged": false,
+          "committedAt": 1000100,
+          "availabilityObservation": {
+            "effectiveDriverAvailability": "available",
+            "observedAt": 1000100
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-04",
+    "section": "5c",
+    "value": {
+      "case": "offline-withdraw",
+      "request": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "online": false
+      },
+      "response": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "serverTime": 1000000,
+        "replayed": false,
+        "committed": {
+          "online": false,
+          "onlineRevision": 2,
+          "onlineChangedAt": 1000000,
+          "intentChanged": true,
+          "committedAt": 1000000,
+          "availabilityObservation": {
+            "effectiveDriverAvailability": "offline",
+            "observedAt": 1000000
+          },
+          "withdrawnOffer": {
+            "schemaVersion": 1,
+            "offerId": "offer-old",
+            "rideId": "ride-search",
+            "driverId": "u-owner",
+            "status": "withdrawn",
+            "createdAt": 995000,
+            "expiresAt": 1015000,
+            "resolvedAt": 1000000,
+            "rideVersion": 3,
+            "pickup": {
+              "lat": 0,
+              "lng": 0,
+              "address": "A"
+            },
+            "dropoff": {
+              "lat": 1,
+              "lng": 1,
+              "address": "B"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-05",
+    "section": "5c",
+    "value": {
+      "case": "offline-retains-accepted-assignment",
+      "given": {
+        "assignment": "on_trip"
+      },
+      "request": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "online": false
+      },
+      "response": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "serverTime": 1000000,
+        "replayed": false,
+        "committed": {
+          "online": false,
+          "onlineRevision": 2,
+          "onlineChangedAt": 1000000,
+          "intentChanged": true,
+          "committedAt": 1000000,
+          "availabilityObservation": {
+            "effectiveDriverAvailability": "offline",
+            "observedAt": 1000000
+          }
+        }
+      },
+      "expected": {
+        "assignmentRetained": true,
+        "tripPhaseUnchanged": true
+      }
+    }
+  },
+  {
+    "id": "5c-06",
+    "section": "5c",
+    "value": {
+      "case": "online-rider-active",
+      "request": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "online": true
+      },
+      "response": {
+        "schemaVersion": 1,
+        "commandId": "0000000f-4240-7000-8000-000000000001",
+        "serverTime": 1000000,
+        "replayed": false,
+        "committed": {
+          "online": true,
+          "onlineRevision": 1,
+          "onlineChangedAt": 1000000,
+          "intentChanged": true,
+          "committedAt": 1000000,
+          "availabilityObservation": {
+            "effectiveDriverAvailability": "offline",
+            "observedAt": 1000000
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-07",
+    "section": "5c",
+    "value": {
+      "case": "history-first-tie",
+      "given": {
+        "orderedRideIds": [
+          "ride-c",
+          "ride-b",
+          "ride-a"
+        ],
+        "endedAt": [
+          900000,
+          900000,
+          800000
+        ],
+        "cursorRegistryToken": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "fixedLimit": 2,
+        "upperBound": 1000000
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "limit": 2
+      },
+      "response": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "serverTime": 1000000,
+        "items": [
+          {
+            "schemaVersion": 1,
+            "rideId": "ride-c",
+            "riderId": "u-owner",
+            "status": "no_driver_found",
+            "version": 3,
+            "pickup": {
+              "lat": 0,
+              "lng": 0,
+              "address": "A"
+            },
+            "dropoff": {
+              "lat": 1,
+              "lng": 1,
+              "address": "B"
+            },
+            "createdAt": 780000,
+            "updatedAt": 900000,
+            "searchDeadlineAt": 900000,
+            "endedAt": 900000,
+            "failure": {
+              "code": "no_driver_found",
+              "at": 900000
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "rideId": "ride-b",
+            "riderId": "u-owner",
+            "status": "no_driver_found",
+            "version": 3,
+            "pickup": {
+              "lat": 0,
+              "lng": 0,
+              "address": "A"
+            },
+            "dropoff": {
+              "lat": 1,
+              "lng": 1,
+              "address": "B"
+            },
+            "createdAt": 780000,
+            "updatedAt": 900000,
+            "searchDeadlineAt": 900000,
+            "endedAt": 900000,
+            "failure": {
+              "code": "no_driver_found",
+              "at": 900000
+            }
+          }
+        ],
+        "hasMore": true,
+        "nextCursor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    }
+  },
+  {
+    "id": "5c-08",
+    "section": "5c",
+    "value": {
+      "case": "history-next-last",
+      "given": {
+        "cursorToken": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "boundary": {
+          "endedAt": 900000,
+          "rideId": "ride-b"
+        },
+        "fixedLimit": 2
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "cursor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "serverTime": 1000000,
+        "items": [
+          {
+            "schemaVersion": 1,
+            "rideId": "ride-a",
+            "riderId": "u-owner",
+            "status": "no_driver_found",
+            "version": 3,
+            "pickup": {
+              "lat": 0,
+              "lng": 0,
+              "address": "A"
+            },
+            "dropoff": {
+              "lat": 1,
+              "lng": 1,
+              "address": "B"
+            },
+            "createdAt": 680000,
+            "updatedAt": 800000,
+            "searchDeadlineAt": 800000,
+            "endedAt": 800000,
+            "failure": {
+              "code": "no_driver_found",
+              "at": 800000
+            }
+          }
+        ],
+        "hasMore": false
+      }
+    }
+  },
+  {
+    "id": "5c-09",
+    "section": "5c",
+    "value": {
+      "case": "history-empty-default",
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "serverTime": 1000000,
+        "items": [],
+        "hasMore": false
+      },
+      "expected": {
+        "effectiveLimit": 20
+      }
+    }
+  },
+  {
+    "id": "5c-10",
+    "section": "5c",
+    "value": {
+      "case": "history-driver-empty-offer-only",
+      "given": {
+        "eligible": false,
+        "offeredOnly": true
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "driver",
+        "limit": 50
+      },
+      "response": {
+        "schemaVersion": 1,
+        "actorRole": "driver",
+        "serverTime": 1000000,
+        "items": [],
+        "hasMore": false
+      }
+    }
+  },
+  {
+    "id": "5c-11",
+    "section": "5c",
+    "value": {
+      "case": "history-malformed-cursor",
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "cursor": "tampered"
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "invalid_history_cursor",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-12",
+    "section": "5c",
+    "value": {
+      "case": "history-foreign-cursor",
+      "given": {
+        "tokenOwner": "u-other"
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "cursor": "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "invalid_history_cursor",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-13",
+    "section": "5c",
+    "value": {
+      "case": "history-wrong-role-cursor",
+      "given": {
+        "tokenRole": "rider"
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "driver",
+        "cursor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "invalid_history_cursor",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-14",
+    "section": "5c",
+    "value": {
+      "case": "history-expired-cursor",
+      "given": {
+        "issuedAt": 1000000,
+        "expiresAt": 4600000,
+        "now": 4600000,
+        "ownToken": true
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "cursor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "error": {
+        "code": "failed-precondition",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "history_cursor_expired",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-15",
+    "section": "5c",
+    "value": {
+      "case": "history-invalid-limit",
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "limit": 0
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "invalid_history_limit",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-16",
+    "section": "5c",
+    "value": {
+      "case": "history-changed-limit",
+      "given": {
+        "cursorFixedLimit": 2
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "cursor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "limit": 3
+      },
+      "error": {
+        "code": "invalid-argument",
+        "details": {
+          "schemaVersion": 1,
+          "reason": "invalid_history_cursor",
+          "retryable": false
+        }
+      }
+    }
+  },
+  {
+    "id": "5c-17",
+    "section": "5c",
+    "value": {
+      "case": "history-late-archive-missed-until-refresh",
+      "given": {
+        "firstConsumedBoundary": {
+          "endedAt": 900000,
+          "rideId": "ride-b"
+        },
+        "lateArchive": {
+          "rideId": "ride-z",
+          "endedAt": 950000
+        },
+        "upperBound": 1000000
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "cursor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "response": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "serverTime": 1000000,
+        "items": [
+          {
+            "schemaVersion": 1,
+            "rideId": "ride-a",
+            "riderId": "u-owner",
+            "status": "no_driver_found",
+            "version": 3,
+            "pickup": {
+              "lat": 0,
+              "lng": 0,
+              "address": "A"
+            },
+            "dropoff": {
+              "lat": 1,
+              "lng": 1,
+              "address": "B"
+            },
+            "createdAt": 680000,
+            "updatedAt": 800000,
+            "searchDeadlineAt": 800000,
+            "endedAt": 800000,
+            "failure": {
+              "code": "no_driver_found",
+              "at": 800000
+            }
+          }
+        ],
+        "hasMore": false
+      },
+      "expected": {
+        "lateRideVisible": false
+      }
+    }
+  },
+  {
+    "id": "5c-18",
+    "section": "5c",
+    "value": {
+      "case": "history-explicit-refresh-includes-late",
+      "given": {
+        "archivedRideIds": [
+          "ride-z",
+          "ride-c",
+          "ride-b",
+          "ride-a"
+        ],
+        "refreshUpperBound": 1000100
+      },
+      "request": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "limit": 2
+      },
+      "response": {
+        "schemaVersion": 1,
+        "actorRole": "rider",
+        "serverTime": 1000100,
+        "items": [
+          {
+            "schemaVersion": 1,
+            "rideId": "ride-z",
+            "riderId": "u-owner",
+            "status": "no_driver_found",
+            "version": 3,
+            "pickup": {
+              "lat": 0,
+              "lng": 0,
+              "address": "A"
+            },
+            "dropoff": {
+              "lat": 1,
+              "lng": 1,
+              "address": "B"
+            },
+            "createdAt": 830000,
+            "updatedAt": 950000,
+            "searchDeadlineAt": 950000,
+            "endedAt": 950000,
+            "failure": {
+              "code": "no_driver_found",
+              "at": 950000
+            }
+          },
+          {
+            "schemaVersion": 1,
+            "rideId": "ride-c",
+            "riderId": "u-owner",
+            "status": "no_driver_found",
+            "version": 3,
+            "pickup": {
+              "lat": 0,
+              "lng": 0,
+              "address": "A"
+            },
+            "dropoff": {
+              "lat": 1,
+              "lng": 1,
+              "address": "B"
+            },
+            "createdAt": 780000,
+            "updatedAt": 900000,
+            "searchDeadlineAt": 900000,
+            "endedAt": 900000,
+            "failure": {
+              "code": "no_driver_found",
+              "at": 900000
+            }
+          }
+        ],
+        "hasMore": true,
+        "nextCursor": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBA"
+      }
+    }
+  },
+  {
+    "id": "5c-19",
+    "section": "5c",
+    "value": {
+      "case": "history-late-older-after-exhaustion",
+      "given": {
+        "previousHasMore": false,
+        "subsequentlyArchived": {
+          "rideId": "ride-old",
+          "endedAt": 700000
+        }
+      },
+      "expected": {
+        "automaticCompletenessClaim": false,
+        "explicitRefreshRequired": true
+      }
+    }
+  },
+  {
+    "id": "9b-01",
+    "section": "9b",
+    "value": {
+      "case": "client-restart-uncertain-upload",
+      "given": {
+        "savedLastAllocatedSequence": 8,
+        "serverLastAcceptedSequence": 7,
+        "pendingSampleDurable": false
+      },
+      "expected": {
+        "discardOldGps": true,
+        "resumeSavedSession": true,
+        "nextAllocatedSequence": 9,
+        "requireFreshFix": true,
+        "acquireReplacement": false
+      }
+    }
+  },
+  {
+    "id": "9b-02",
+    "section": "9b",
+    "value": {
+      "case": "client-takeover-loss",
+      "given": {
+        "reason": "session_generation_conflict",
+        "currentGeneration": 2
+      },
+      "expected": {
+        "automaticAcquireRetry": false,
+        "publishingStopped": true,
+        "explicitTakeoverDecisionRequired": true,
+        "tripRetained": true
+      }
+    }
+  },
+  {
+    "id": "9b-03",
+    "section": "9b",
+    "value": {
+      "case": "client-projection-generation-reset",
+      "given": {
+        "current": {
+          "publisherGeneration": 1,
+          "sequence": 900
+        },
+        "incoming": {
+          "publisherGeneration": 2,
+          "sequence": 1
+        },
+        "sameAuthorizedRideAndDriver": true
+      },
+      "expected": {
+        "acceptIncomingOrder": true
+      }
+    }
+  },
+  {
+    "id": "9b-04",
+    "section": "9b",
+    "value": {
+      "case": "client-late-ack-after-role-switch",
+      "given": {
+        "sentSessionRole": "driver",
+        "currentSessionRole": "rider",
+        "ackOutcome": "accepted"
+      },
+      "expected": {
+        "applyToCurrentObservation": false,
+        "resumePublishing": false,
+        "changeTripPhase": false
+      }
+    }
+  },
+  {
+    "id": "9c-01",
+    "section": "9c",
+    "value": {
+      "case": "client-old-online-replay",
+      "given": {
+        "confirmedOnlineRevision": 2,
+        "confirmedOnlineIntent": false,
+        "resultCommittedRevision": 1,
+        "resultCommittedOnline": true,
+        "resultReplayed": true,
+        "resultServerTimeIsNewer": true
+      },
+      "expected": {
+        "completeMatchingCommandBookkeeping": true,
+        "overwriteCurrentControl": false,
+        "withdrawCurrentOffer": false
+      }
+    }
+  },
+  {
+    "id": "9c-02",
+    "section": "9c",
+    "value": {
+      "case": "client-refresh-fences-old-page",
+      "given": {
+        "sentTraversalId": "t1",
+        "currentTraversalId": "t2",
+        "sameUidAndRole": true
+      },
+      "expected": {
+        "appendOldPage": false,
+        "changeCurrentCursor": false
+      }
+    }
+  },
+  {
+    "id": "9c-03",
+    "section": "9c",
+    "value": {
+      "case": "client-optional-null-omission",
+      "given": {
+        "dartCursor": null,
+        "dartLimit": null
+      },
+      "expectedRequest": {
+        "schemaVersion": 1,
+        "actorRole": "rider"
+      },
+      "expected": {
+        "firstPageDefaultLimit": 20
+      }
+    }
+  },
+  {
+    "id": "9c-04",
+    "section": "9c",
+    "value": {
+      "case": "client-expired-cursor",
+      "given": {
+        "reason": "history_cursor_expired",
+        "priorItems": [
+          "ride-a"
+        ]
+      },
+      "expected": {
+        "preserveItemsAsStale": true,
+        "automaticPageOne": false,
+        "explicitRefreshRequired": true,
+        "changeActiveTrip": false
+      }
+    }
+  }
+]
