@@ -1,6 +1,6 @@
 "use strict";
 const { test, before, after, beforeEach } = require("node:test");
-const assert = require("node:assert/strict");
+const { denied } = require("../support/denied");
 const fs = require("node:fs");
 const path = require("node:path");
 const { ROOT, PROJECT, assertEmulatorTarget } = require("../../scripts/emulator-safety");
@@ -8,16 +8,15 @@ const { ROOT, PROJECT, assertEmulatorTarget } = require("../../scripts/emulator-
 assertEmulatorTarget(process.env);
 const { initializeTestEnvironment, assertSucceeds } = require("@firebase/rules-unit-testing");
 const { doc, getDoc, setDoc, deleteDoc, collection, getDocs } = require("firebase/firestore");
-const { ref, get, set, remove } = require("firebase/database");
+const { ref, onValue, set, remove } = require("firebase/database");
+// onValue cancellation retains the permission code that get() loses.
+const get = (target) => new Promise((resolve, reject) => {
+  onValue(target, resolve, reject, { onlyOnce: true });
+});
 let env;
 const owner = "driver-owner";
 const actors = [{ name: "unauthenticated", uid: null }, { name: "unrelated", uid: "unrelated" }];
 const ctx = (uid) => uid ? env.authenticatedContext(uid) : env.unauthenticatedContext();
-async function denied(operation) {
-  await assert.rejects(operation, (error) =>
-    /^(permission-denied|PERMISSION_DENIED|database\/permission-denied)$/.test(error.code),
-  "Expected actual permission-denied, not timeout/missing emulator/network error");
-}
 before(async () => {
   env = await initializeTestEnvironment({
     projectId: PROJECT,

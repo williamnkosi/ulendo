@@ -32,7 +32,8 @@ function assertNoConflictingTarget(incoming) {
 function localEnvironment() {
   assertNoConflictingTarget(process.env);
   const cache = path.join(ROOT, ".cache/backend-tests");
-  const env = { ...process.env, ...HOSTS, GCLOUD_PROJECT: PROJECT,
+  // PATH selects Node and Java. No other ambient runtime settings are needed.
+  const env = { PATH: process.env.PATH, LANG: "en_US.UTF-8", ...HOSTS, GCLOUD_PROJECT: PROJECT,
     GOOGLE_CLOUD_PROJECT: PROJECT, CI: "true",
     FIREBASE_CLI_DISABLE_USAGE_REPORTING: "true", NO_UPDATE_NOTIFIER: "1",
     npm_config_cache: path.join(cache, "npm"),
@@ -43,12 +44,6 @@ function localEnvironment() {
     TMPDIR: path.join(cache, "tmp"), TMP: path.join(cache, "tmp"),
     TEMP: path.join(cache, "tmp"),
   };
-  // Do not forward credentials or ambient SDK endpoint overrides to children.
-  for (const key of Object.keys(env)) {
-    if (/^(GOOGLE_APPLICATION_CREDENTIALS|FIREBASE_TOKEN|FIREBASE_CONFIG|CLOUDSDK_|GOOGLE_GHA_CREDS_PATH)/.test(key)) {
-      delete env[key];
-    }
-  }
   for (const key of ["npm_config_cache", "FIREBASE_EMULATORS_PATH",
     "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME", "TMPDIR"]) {
     fs.mkdirSync(env[key], { recursive: true });

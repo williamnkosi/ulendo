@@ -3,8 +3,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const net = require("node:net");
 const crypto = require("node:crypto");
-const { spawn, spawnSync } = require("node:child_process");
+const { spawnSync } = require("node:child_process");
 const { ROOT, PROJECT, localEnvironment, assertEmulatorTarget, shellQuote } = require("./emulator-safety");
+const { supervise } = require("./supervise");
 async function main() {
   const env = localEnvironment();
   assertEmulatorTarget(env);
@@ -53,45 +54,10 @@ async function main() {
   const log = fs.createWriteStream(path.join(artifact, "harness.log"));
   const testCommand = shellQuote(process.execPath) + " --test --test-concurrency=1 " +
     shellQuote(path.join(ROOT, "functions/test/rules/current-rules.test.js"));
-  const child = spawn(process.execPath, [path.join(cli, "lib/bin/firebase.js"),
+  const code = await supervise(process.execPath, [path.join(cli, "lib/bin/firebase.js"),
     "emulators:exec", "--only", "auth,database,firestore", "--project", PROJECT,
     "--config", path.join(ROOT, "firebase.test.json"), "--non-interactive", testCommand],
-  { cwd: artifact, env, detached: true, stdio: ["ignore", "pipe", "pipe"] });
-  for (const stream of [child.stdout, child.stderr]) {
-    stream.on("data", (chunk) => {
-      log.write(chunk); process.stdout.write(chunk);
-    });
-  }
-  const stop = (signal = "SIGTERM") => {
-    if (!child.pid) return;
-    try {
-      process.kill(-child.pid, signal);
-    } catch (error) {
-      if (error.code !== "ESRCH") throw error;
-    }
-  };
-  let killTimer;
-  const terminate = () => {
-    stop();
-    if (!killTimer) killTimer = setTimeout(() => stop("SIGKILL"), 5000);
-  };
-  process.once("SIGINT", terminate);
-  process.once("SIGTERM", terminate);
-  const timeout = setTimeout(terminate, 180000);
-  let code;
-  try {
-    code = await new Promise((resolve, reject) => {
-      child.once("error", reject);
-      child.once("close", (status) => resolve(status === null ? 1 : status));
-    });
-  } finally {
-    clearTimeout(timeout);
-    clearTimeout(killTimer);
-    stop("SIGKILL");
-    process.removeListener("SIGINT", terminate);
-    process.removeListener("SIGTERM", terminate);
-    await new Promise((resolve) => log.end(resolve));
-  }
+  { cwd: artifact, env }, { log, timeoutMs: 180000, graceMs: 5000 });
   console.log("Artifacts: " + artifact);
   process.exitCode = code;
 }

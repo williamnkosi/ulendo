@@ -10,7 +10,7 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test:fixtures": "node --test test/fixtures.test.js",
-    "test:guards": "node --test test/safety.test.js",
+    "test:guards": "node --test test/safety.test.js test/supervise.test.js",
     "test:emulators": "node scripts/run-emulator-tests.js"
   },
   "engines": {
