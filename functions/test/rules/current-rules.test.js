@@ -1,5 +1,6 @@
 "use strict";
 const { test, before, after, beforeEach } = require("node:test");
+const assert = require("node:assert/strict");
 const { denied } = require("../support/denied");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -31,6 +32,11 @@ beforeEach(async () => {
   await env.clearDatabase();
   await env.clearFirestore();
   await env.withSecurityRulesDisabled(async (admin) => {
+    assert.equal((await get(ref(admin.database()))).val(), null, "RTDB reset must remove previous test data");
+    for (const name of ["users", "rides", "_rideHistoryCursors"]) {
+      assert.equal((await getDocs(collection(admin.firestore(), name))).empty, true,
+        "Firestore reset must remove previous " + name + " records");
+    }
     await set(ref(admin.database(), "drivers/" + owner), {
       status: "offline", location: { driverId: owner, latitude: 0, longitude: 0 },
     });
@@ -46,6 +52,14 @@ beforeEach(async () => {
     }
     await setDoc(doc(admin.firestore(), "rides/ride-one"), { synthetic: true });
     await setDoc(doc(admin.firestore(), "_rideHistoryCursors/cursor-one"), { synthetic: true });
+  });
+});
+test("isolation probe leaves unexpected records for the next reset to remove", async () => {
+  await env.withSecurityRulesDisabled(async (admin) => {
+    await set(ref(admin.database(), "isolation-probe/unexpected"), { synthetic: true });
+    await setDoc(doc(admin.firestore(), "users/isolation-probe"), { synthetic: true });
+    assert.equal((await get(ref(admin.database(), "isolation-probe/unexpected"))).exists(), true);
+    assert.equal((await getDoc(doc(admin.firestore(), "users/isolation-probe"))).exists(), true);
   });
 });
 after(async () => {
