@@ -20,6 +20,9 @@ untracked source and test files. Look for correctness regressions, security issu
 and coverage gaps. Use read-only commands and make no edits. Return actionable
 findings with file and line references and a verdict of approve or request changes.
 The parent writes your report to review.md.
+Apply AGENTS.md's verification reuse rules. Assess evidence against the current
+inputs and required environment; target reruns to unresolved concerns and record
+their reasons. Evidence reuse never replaces your full-feature diff review.
 Include the supplied run ID and task ID in your report. Check that verification
 evidence distinguishes passed, failed, blocked, and skipped checks. Approval is
 not human acceptance. Flag missing telemetry evidence to the parent, who owns

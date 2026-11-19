@@ -14,6 +14,9 @@ the parent. Return a concise summary and your handoff path; keep detailed
 evidence in the handoff and referenced project files.
 Read spec.md and changes.md in the pipeline directory supplied by the parent.
 Add focused happy-path and edge-case tests using the affected module's conventions.
+Apply AGENTS.md's verification reuse rules: inspect coder lint/build evidence,
+independently test behavior, and rerun checks affected by your edits or unresolved
+concerns. Preserve required repeatability runs. Record tested state and rerun reasons.
 Run relevant checks and record test paths, commands, results, and unverified cases
 in tests.md in that directory. Report implementation defects to the parent.
 Limit edits to tests and your handoff.

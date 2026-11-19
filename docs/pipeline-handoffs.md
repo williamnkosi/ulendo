@@ -10,6 +10,15 @@ If an evidence file is unavailable, say so and retain the observed result and ga
 Target 500 words excluding tables. This is a brevity target, not a cap on findings.
 Read the spec and relevant source as required; a short handoff does not replace them.
 
+For every executed check, record the tested commit and any relevant uncommitted
+paths/state (use a patch or content digest when needed to distinguish versions),
+working directory, and relevant runtime/environment alongside the command and
+result. Never record secrets. This identifies which inputs the evidence covers;
+HEAD alone is insufficient when relevant files were modified. For reruns, include
+the reason and the earlier attempt ID. Inherited results retain their original
+attempt IDs and evidence paths and are not new telemetry executions. Reuse them
+only under AGENTS.md's verification rules; required repeatability runs still execute.
+
 ## Specialist and combined implementation reports
 
 Use for `changes-firebase.md`, `changes-flutter.md`, and parent-owned `changes.md`.

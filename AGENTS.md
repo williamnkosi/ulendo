@@ -113,6 +113,30 @@ remains the requirements document, not a results handoff subject to this format.
 The parent combines specialist results without duplicating shared background or
 check attempts and preserves evidence references for telemetry and later stages.
 
+### Reuse verification evidence
+
+Do not repeat checks automatically at each stage. Coders run the lint, build,
+and focused checks required for their changes. The tester inspects that evidence
+and independently tests behavior, edge cases, and coverage gaps. After test edits,
+run the affected tests and applicable lint/build checks; do not repeat an unrelated
+build solely because the stage changed. The reviewer inspects the full feature
+diff and verification evidence, with reruns targeted to unresolved concerns.
+
+Reuse a result only when its command, working directory, relevant environment,
+tested revision/working-tree state, and outcome are recorded and its inputs remain
+applicable. A new commit alone does not invalidate a check if its relevant inputs
+are unchanged. Rerun when relevant code, dependencies, configuration, or environment
+changed; earlier evidence is missing, unclear, or from an unsuitable runtime; a
+failed/blocked check's cause was addressed; or a suspected defect needs reproduction.
+Record the reason for each rerun. Do not retry a known blocker without a relevant
+change or new evidence that the attempt can progress.
+
+Always execute repetitions required by acceptance criteria, such as two consecutive
+emulator runs proving teardown/isolation. Evidence reuse does not replace independent
+behavioral testing, required checks, or full-diff review. Mark inherited evidence
+with its original attempt ID; it is not a new execution or an additional telemetry
+pass. Never treat a blocked, skipped, or diagnostic-only result as acceptance.
+
 ### Evaluation and observability
 
 The parent must follow [the telemetry guide](docs/pipeline-observability.md) for
