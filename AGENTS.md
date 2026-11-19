@@ -28,6 +28,33 @@ In pull requests, link the issue, summarize the affected apps or services, list 
 
 ## Feature Pipeline
 
+### Parent preflight
+
+Before dispatching the planner, the parent performs these lightweight checks;
+do not spawn an agent for preflight:
+
+- Confirm the supplied ULENDO issue number from the request or established session
+  context. Do not invent or increment it. If missing or conflicting, ask the user
+  before dispatching the planner.
+- Confirm the intended feature branch using
+  `ULENDO-<issue-number>/<short-task-description>`. Inspect
+  `git branch --show-current`, `git status --short`, and `git rev-parse HEAD`
+  to record the current branch, checkout changes, and base commit. Reuse an
+  already-confirmed branch. Preserve existing changes; a dirty checkout alone is
+  not a blocker. Resolve an ambiguous target branch or conflicting changes before
+  dispatch, and report any branch-setup failure before starting the planner.
+- For a continuation or retry, read the latest relevant attempt's handoff and
+  blocker evidence, if available. Carry forward known unresolved blockers rather
+  than rediscovering them. Report what is still blocked and which stage it affects;
+  resolve blockers that prevent useful planning before dispatch. Pass downstream
+  blockers to the planner and the responsible specialist. If no previous attempt
+  exists, record that there are no known prior blockers.
+
+Record a concise preflight result in the run telemetry initialized below before
+planner dispatch. Keep this check limited to issue, branch/checkout, and known
+blockers. Dependency and runtime verification belongs to the coding and test
+agents for their assigned scope; do not perform a broad dependency scan here.
+
 ### Evaluation and observability
 
 The parent must follow [the telemetry guide](docs/pipeline-observability.md) for
