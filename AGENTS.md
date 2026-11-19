@@ -137,6 +137,30 @@ behavioral testing, required checks, or full-diff review. Mark inherited evidenc
 with its original attempt ID; it is not a new execution or an additional telemetry
 pass. Never treat a blocked, skipped, or diagnostic-only result as acceptance.
 
+### Bounded exploration and output
+
+Start investigation in assigned paths and source entry points from the stage input
+and spec. Use targeted `rg` searches and file listings before reading broad trees.
+Read matching functions and enough surrounding code to understand their behavior;
+prefer relevant excerpts over dumping large files or repository-wide search output.
+Expand into callers, shared contracts, configuration, or dependency source when
+findings require it. If the location is unknown, use a broad discovery search, then
+narrow subsequent reads. These are efficiency rules, not limits on understanding:
+do not omit required reading, relevant dependencies, security analysis, or the
+reviewer's full-feature diff review to keep output short.
+
+Capture verbose build/test/tool output in project-local evidence files. Report the
+command, actual exit status, result counts where available, concise failures or
+blockers, and log path. Preserve the command's exit status when redirecting or
+piping output; successful log capture is not a successful check. Inspect relevant
+failure excerpts and expand as needed rather than printing entire logs. Do not
+persist credentials or other secrets in logs.
+
+Keep progress updates and final stage summaries concise: meaningful findings,
+decisions, blockers, next action, and handoff/evidence paths. Avoid narrating routine
+file reads or copying source/logs into updates. Concision must not hide material
+findings, incomplete verification, or evidence needed by the next stage.
+
 ### Evaluation and observability
 
 The parent must follow [the telemetry guide](docs/pipeline-observability.md) for
