@@ -25,6 +25,79 @@ async function rebind(port) {
   });
   await new Promise((resolve) => server.close(resolve));
 }
+test("historical unreferenced detached-child leak is absent", { timeout: 5000 }, async () => {
+  let pid;
+  let anchor;
+  const log = new PassThrough();
+  log.resume();
+  const script = "const {spawn}=require('node:child_process');" +
+    "const c=spawn(process.execPath,['-e','setInterval(()=>{},1000)']," +
+    "{detached:true,stdio:'ignore'});c.unref();console.log(c.pid);" +
+    "process.on('SIGTERM',()=>process.exit(0));setInterval(()=>{},1000);";
+  try {
+    const status = await supervise(process.execPath, ["-e", script], { env: localEnvironment() }, {
+      log, timeoutMs: 600, graceMs: 100,
+      onSpawn: (child) => {
+        anchor = child;
+        child.stdout.once("data", (chunk) => {
+          pid = Number(String(chunk).trim());
+        });
+      },
+    });
+    assert.equal(status, 1);
+    assert.ok(Number.isInteger(pid) && pid > 0);
+    assert.ok(absent(pid), "historical leaked grandchild gone before safety finalizer");
+    assert.ok(log.writableFinished);
+    console.log(JSON.stringify({ historicalReproduction: true, pid, status, cleaned: true }));
+  } finally {
+    if (pid && !absent(pid)) process.kill(pid, "SIGKILL");
+    if (anchor && !absent(anchor.pid)) anchor.kill("SIGKILL");
+  }
+});
+test("fork and execFile propagate containment across rapid CLI exit", { timeout: 7000 }, async () => {
+  const bridgePath = path.join(__dirname, "support/supervise-bridge.js");
+  const records = [];
+  let anchor;
+  let output = "";
+  const log = new PassThrough();
+  log.resume();
+  const script = "const {fork}=require('node:child_process');" +
+    "const c=fork(" + JSON.stringify(bridgePath) + ",[]," +
+    "{detached:true,execArgv:[],stdio:['ignore','inherit','inherit','ipc']});" +
+    "c.once('message',()=>process.exit(0));";
+  try {
+    const status = await supervise(process.execPath, ["-e", script], { env: localEnvironment() }, {
+      log, timeoutMs: 3000, graceMs: 200,
+      onSpawn: (child) => {
+        anchor = child;
+        child.stdout.on("data", (chunk) => {
+          output += chunk;
+          let newline;
+          while ((newline = output.indexOf("\n")) >= 0) {
+            records.push(JSON.parse(output.slice(0, newline)));
+            output = output.slice(newline + 1);
+          }
+        });
+      },
+    });
+    assert.equal(status, 0);
+    assert.equal(records.length, 2, "both generations reached readiness before natural CLI exit");
+    for (const record of records) {
+      assert.equal(record.pgid, anchor.pid, "fork and execFile detach requests contained");
+      assert.ok(absent(record.bridge || record.pid), "descendant absent before finalizer");
+      if (record.port) await rebind(record.port);
+    }
+    assert.ok(absent(anchor.pid));
+    assert.ok(log.writableFinished);
+    console.log(JSON.stringify({ multiGeneration: records, anchor: anchor.pid, cleaned: true }));
+  } finally {
+    for (const record of records) {
+      const pid = record.bridge || record.pid;
+      if (!absent(pid)) process.kill(pid, "SIGKILL");
+    }
+    if (anchor && !absent(anchor.pid)) anchor.kill("SIGKILL");
+  }
+});
 async function responds(port) {
   return new Promise((resolve, reject) => {
     const socket = net.connect(port, "127.0.0.1");
